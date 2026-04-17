@@ -1,0 +1,32 @@
+{% if (vrf.name | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     for vrf_name, vrf_config in vrf.name.items() %}
+{%         if (vrf_config.table | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vrf name {{ vrf_name }} table '{{ vrf_config.table }}'
+{%         endif %}
+{%         if (vrf_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vrf name {{ vrf_name }} description '{{ vrf_config.description }}'
+{%         endif %}
+{%         if (vrf_config.protocols | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             if (vrf_config.protocols.static | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (vrf_config.protocols.static.route | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     for prefix, cfg in vrf_config.protocols.static.route.items() %}
+{%                         if (cfg.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vrf name {{ vrf_name }} protocols static route {{ prefix }} next-hop {{ cfg.next_hop }}
+{%                         elif (cfg.blackhole | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set vrf name {{ vrf_name }} protocols static route {{ prefix }} blackhole
+{%                         endif %}
+{%                     endfor %}
+{%                 endif %}
+{%                 if (vrf_config.protocols.static.route6 | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     for prefix, cfg in vrf_config.protocols.static.route6.items() %}
+{%                         if (cfg.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vrf name {{ vrf_name }} protocols static route6 {{ prefix }} next-hop {{ cfg.next_hop }}
+{%                         elif (cfg.blackhole | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set vrf name {{ vrf_name }} protocols static route6 {{ prefix }} blackhole
+{%                         endif %}
+{%                     endfor %}
+{%                 endif %}
+{%             endif %}
+{%         endif %}
+{%     endfor %}
+{% endif %}

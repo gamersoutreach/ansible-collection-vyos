@@ -1,0 +1,292 @@
+{# ssh #}
+{% if (service.ssh | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.ssh.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service ssh port '{{ service.ssh.port }}'
+{%     endif %}
+{%     if (service.ssh.disable_host_validation | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set service ssh disable-host-validation
+{%     endif %}
+{%     if (service.ssh.disable_password_authentication | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set service ssh disable-password-authentication
+{%     endif %}
+{%     if (service.ssh.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for addr in service.ssh.listen_address %}
+set service ssh listen-address '{{ addr }}'
+{%         endfor %}
+{%     endif %}
+{%     if (service.ssh.ciphers | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for cipher in service.ssh.ciphers %}
+set service ssh ciphers '{{ cipher }}'
+{%         endfor %}
+{%     endif %}
+{%     if (service.ssh.key_exchange | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for kex in service.ssh.key_exchange %}
+set service ssh key-exchange '{{ kex }}'
+{%         endfor %}
+{%     endif %}
+{%     if (service.ssh.mac | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for m in service.ssh.mac %}
+set service ssh mac '{{ m }}'
+{%         endfor %}
+{%     endif %}
+{%     if (service.ssh.loglevel | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service ssh loglevel '{{ service.ssh.loglevel }}'
+{%     endif %}
+{% endif %}
+{# ntp #}
+{% if (service.ntp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.ntp.allow_client | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (service.ntp.allow_client.address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for addr in service.ntp.allow_client.address %}
+set service ntp allow-client address '{{ addr }}'
+{%             endfor %}
+{%         endif %}
+{%     endif %}
+{%     if (service.ntp.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for addr in service.ntp.listen_address %}
+set service ntp listen-address '{{ addr }}'
+{%         endfor %}
+{%     endif %}
+{%     if (service.ntp.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for server_name, server_opts in service.ntp.server.items() %}
+{%             set flags = [] %}
+{%             if server_opts is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (server_opts.prefer | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{%                     set _ = flags.append('prefer') %}
+{%                 endif %}
+{%                 if (server_opts.pool | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{%                     set _ = flags.append('pool') %}
+{%                 endif %}
+{%                 if (server_opts.noselect | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{%                     set _ = flags.append('noselect') %}
+{%                 endif %}
+{%             endif %}
+{%             if flags %}
+set service ntp server {{ server_name }} {{ flags | join(' ') }}
+{%             else %}
+set service ntp server {{ server_name }}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# dhcp-server #}
+{% if (service.dhcp_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.dhcp_server.shared_network_name | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for net_name, net_config in service.dhcp_server.shared_network_name.items() %}
+{%             if (net_config.subnet | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for subnet, subnet_config in net_config.subnet.items() %}
+{%                     set prefix = 'set service dhcp-server shared-network-name ' ~ net_name ~ ' subnet ' ~ subnet %}
+{%                     if (subnet_config.range | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         for range_name, range_config in subnet_config.range.items() %}
+{%                             if (range_config.start | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} range {{ range_name }} start '{{ range_config.start }}'
+{%                             endif %}
+{%                             if (range_config.stop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} range {{ range_name }} stop '{{ range_config.stop }}'
+{%                             endif %}
+{%                         endfor %}
+{%                     endif %}
+{%                     if (subnet_config.default_router | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} default-router '{{ subnet_config.default_router }}'
+{%                     endif %}
+{%                     if (subnet_config.dns_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                         for dns in subnet_config.dns_server %}
+{{ prefix }} dns-server '{{ dns }}'
+{%                         endfor %}
+{%                     endif %}
+{%                     if (subnet_config.domain_name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} domain-name '{{ subnet_config.domain_name }}'
+{%                     endif %}
+{%                     if (subnet_config.lease | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} lease '{{ subnet_config.lease }}'
+{%                     endif %}
+{%                     if (subnet_config.static_mapping | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         for mapping_name, mapping_config in subnet_config.static_mapping.items() %}
+{%                             if (mapping_config.ip_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} static-mapping {{ mapping_name }} ip-address '{{ mapping_config.ip_address }}'
+{%                             endif %}
+{%                             if (mapping_config.mac_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} static-mapping {{ mapping_name }} mac-address '{{ mapping_config.mac_address }}'
+{%                             endif %}
+{%                         endfor %}
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# dns forwarding #}
+{% if (service.dns | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.dns.forwarding | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         set fwd = service.dns.forwarding %}
+{%         if (fwd.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for addr in fwd.listen_address %}
+set service dns forwarding listen-address '{{ addr }}'
+{%             endfor %}
+{%         endif %}
+{%         if (fwd.allow_from | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for net in fwd.allow_from %}
+set service dns forwarding allow-from '{{ net }}'
+{%             endfor %}
+{%         endif %}
+{%         if (fwd.cache_size | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service dns forwarding cache-size '{{ fwd.cache_size }}'
+{%         endif %}
+{%         if (fwd.name_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for ns in fwd.name_server %}
+set service dns forwarding name-server '{{ ns }}'
+{%             endfor %}
+{%         endif %}
+{%         if (fwd.domain | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for domain_name, domain_config in fwd.domain.items() %}
+{%                 if (domain_config.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                     for srv in domain_config.server %}
+set service dns forwarding domain {{ domain_name }} server '{{ srv }}'
+{%                     endfor %}
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%         if (fwd.system | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set service dns forwarding system
+{%         endif %}
+{%     endif %}
+{% endif %}
+{# https #}
+{% if (service.https | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.https.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service https listen-address '{{ service.https.listen_address }}'
+{%     endif %}
+{%     if (service.https.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service https port '{{ service.https.port }}'
+{%     endif %}
+{%     if (service.https.certificates | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (service.https.certificates.certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service https certificates certificate '{{ service.https.certificates.certificate }}'
+{%         endif %}
+{%     endif %}
+{%     if (service.https.api | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (service.https.api.keys | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             if (service.https.api.keys.id | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for key_name, key_config in service.https.api.keys.id.items() %}
+{%                     if (key_config.key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service https api keys id {{ key_name }} key '{{ key_config.key }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endif %}
+{%     endif %}
+{%     if (service.https.virtual_host | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for vhost_name, vhost_config in service.https.virtual_host.items() %}
+{%             if (vhost_config.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service https virtual-host {{ vhost_name }} listen-address '{{ vhost_config.listen_address }}'
+{%             endif %}
+{%             if (vhost_config.listen_port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service https virtual-host {{ vhost_name }} listen-port '{{ vhost_config.listen_port }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# lldp #}
+{% if (service.lldp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.lldp.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for iface in service.lldp.interface %}
+set service lldp interface {{ iface }}
+{%         endfor %}
+{%     endif %}
+{%     if (service.lldp.legacy_protocols | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for proto in service.lldp.legacy_protocols %}
+set service lldp legacy-protocols {{ proto }}
+{%         endfor %}
+{%     endif %}
+{%     if (service.lldp.management_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service lldp management-address '{{ service.lldp.management_address }}'
+{%     endif %}
+{% endif %}
+{# snmp #}
+{% if (service.snmp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.snmp.community | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for comm_name, comm_config in service.snmp.community.items() %}
+{%             if (comm_config.authorization | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service snmp community {{ comm_name }} authorization '{{ comm_config.authorization }}'
+{%             endif %}
+{%             if (comm_config.network | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for net in comm_config.network %}
+set service snmp community {{ comm_name }} network '{{ net }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (service.snmp.contact | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service snmp contact '{{ service.snmp.contact }}'
+{%     endif %}
+{%     if (service.snmp.location | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service snmp location '{{ service.snmp.location }}'
+{%     endif %}
+{%     if (service.snmp.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for addr in service.snmp.listen_address %}
+set service snmp listen-address '{{ addr }}'
+{%         endfor %}
+{%     endif %}
+{%     if (service.snmp.trap_target | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for trap in service.snmp.trap_target %}
+{%             if (trap.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (trap.community | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service snmp trap-target {{ trap.address }} community '{{ trap.community }}'
+{%                 endif %}
+{%                 if (trap.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service snmp trap-target {{ trap.address }} port '{{ trap.port }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# router-advert #}
+{% if (service.router_advert | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (service.router_advert.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for iface_name, iface_config in service.router_advert.interface.items() %}
+{%             set ra_prefix = 'set service router-advert interface ' ~ iface_name %}
+{%             if (iface_config.prefix | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for pfx, pfx_config in iface_config.prefix.items() %}
+{%                     if (pfx_config.autonomous_flag | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{{ ra_prefix }} prefix {{ pfx }} autonomous-flag
+{%                     endif %}
+{%                     if (pfx_config.on_link_flag | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{{ ra_prefix }} prefix {{ pfx }} on-link-flag
+{%                     endif %}
+{%                     if (pfx_config.valid_lifetime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ ra_prefix }} prefix {{ pfx }} valid-lifetime '{{ pfx_config.valid_lifetime }}'
+{%                     endif %}
+{%                     if (pfx_config.preferred_lifetime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ ra_prefix }} prefix {{ pfx }} preferred-lifetime '{{ pfx_config.preferred_lifetime }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%             if (iface_config.name_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for ns in iface_config.name_server %}
+{{ ra_prefix }} name-server '{{ ns }}'
+{%                 endfor %}
+{%             endif %}
+{%             if (iface_config.send_advert | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{{ ra_prefix }} send-advert
+{%             endif %}
+{%             if (iface_config.max_interval | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ ra_prefix }} max-interval '{{ iface_config.max_interval }}'
+{%             endif %}
+{%             if (iface_config.min_interval | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ ra_prefix }} min-interval '{{ iface_config.min_interval }}'
+{%             endif %}
+{%             if (iface_config.default_lifetime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ ra_prefix }} default-lifetime '{{ iface_config.default_lifetime }}'
+{%             endif %}
+{%             if (iface_config.link_mtu | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ ra_prefix }} link-mtu '{{ iface_config.link_mtu }}'
+{%             endif %}
+{%             if (iface_config.managed_flag | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{{ ra_prefix }} managed-flag
+{%             endif %}
+{%             if (iface_config.other_config_flag | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+{{ ra_prefix }} other-config-flag
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}

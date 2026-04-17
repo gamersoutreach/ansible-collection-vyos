@@ -1,0 +1,23 @@
+{% if (policy.ipv6_prefix_list | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     for name, config in policy.ipv6_prefix_list.items() %}
+{%         if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy prefix-list6 {{ name }} description '{{ config.description }}'
+{%         endif %}
+{%         if (config.rules | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for rule, rule_config in config.rules.items() %}
+{%                 if (rule_config.action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy prefix-list6 {{ name }} rule {{ rule }} action '{{ rule_config.action }}'
+{%                 endif %}
+{%                 if (rule_config.ge | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy prefix-list6 {{ name }} rule {{ rule }} ge '{{ rule_config.ge }}'
+{%                 endif %}
+{%                 if (rule_config.le | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy prefix-list6 {{ name }} rule {{ rule }} le '{{ rule_config.le }}'
+{%                 endif %}
+{%                 if (rule_config.prefix | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy prefix-list6 {{ name }} rule {{ rule }} prefix '{{ rule_config.prefix }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}

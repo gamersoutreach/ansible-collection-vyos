@@ -1,0 +1,23 @@
+---
+- name: Create required output directories if not present
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "{{ vyos_config_deploy_ssh_post_running_config_backup_dir }}"
+    - "{{ vyos_config_deploy_ssh_pre_running_config_backup_dir }}"
+    - "{{ vyos_config_deploy_ssh_config_diff_dir }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Replace the running config with the intended config
+  vyos.vyos.vyos_config:
+    src: "{{ vyos_config_deploy_ssh_config_dir }}/{{ inventory_hostname }}.cfg"
+    save: true
+    match: none
+    backup: true
+    backup_options:
+      filename: "{{ vyos_config_deploy_ssh_pre_running_config_backup_filename }}"
+      dir_path: "{{ vyos_config_deploy_ssh_pre_running_config_backup_dir }}"
+  notify: "backup config"

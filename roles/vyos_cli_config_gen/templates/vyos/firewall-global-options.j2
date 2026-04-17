@@ -1,0 +1,34 @@
+{% if (firewall.global_options | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     if (firewall.global_options.all_ping | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options all-ping '{{ firewall.global_options.all_ping }}'
+{%     endif %}
+{%     if (firewall.global_options.broadcast_ping | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options broadcast-ping '{{ firewall.global_options.broadcast_ping }}'
+{%     endif %}
+{%     if (firewall.global_options.ip_src_route | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options ip-src-route '{{ firewall.global_options.ip_src_route }}'
+{%     endif %}
+{%     if (firewall.global_options.log_martians | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options log-martians '{{ firewall.global_options.log_martians }}'
+{%     endif %}
+{%     if (firewall.global_options.receive_redirects | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options receive-redirects '{{ firewall.global_options.receive_redirects }}'
+{%     endif %}
+{%     if (firewall.global_options.send_redirects | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options send-redirects '{{ firewall.global_options.send_redirects }}'
+{%     endif %}
+{%     if (firewall.global_options.source_validation | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options source-validation '{{ firewall.global_options.source_validation }}'
+{%     endif %}
+{%     if (firewall.global_options.syn_cookies | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options syn-cookies '{{ firewall.global_options.syn_cookies }}'
+{%     endif %}
+{%     if (firewall.global_options.twa_hazards_protection | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall global-options twa-hazards-protection '{{ firewall.global_options.twa_hazards_protection }}'
+{%     endif %}
+{%     if (firewall.global_options.state_policy | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for state, action in firewall.global_options.state_policy.items() %}
+set firewall global-options state-policy {{ state }} action '{{ action }}'
+{%         endfor %}
+{%     endif %}
+{% endif %}

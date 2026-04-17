@@ -1,0 +1,8 @@
+---
+- name: Backup running config
+  vyos.vyos.vyos_config:
+    backup: true
+    backup_options:
+      dir_path: "{{ vyos_config_deploy_ssh_post_running_config_backup_dir }}"
+      filename: "{{ vyos_config_deploy_ssh_post_running_config_backup_filename }}"
+  listen: "backup config"

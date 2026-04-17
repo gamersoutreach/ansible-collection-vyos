@@ -1,0 +1,215 @@
+{# system config-management #}
+{% if (system.config_management | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.config_management.commit_revisions | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system config-management commit-revisions '{{ system.config_management.commit_revisions }}'
+{%     endif %}
+{% endif %}
+{# system conntrack #}
+{% if (system.conntrack | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.conntrack.modules | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for module in system.conntrack.modules %}
+set system conntrack modules {{ module }}
+{%         endfor %}
+{%     endif %}
+{%     if (system.conntrack.table_size | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system conntrack table-size '{{ system.conntrack.table_size }}'
+{%     endif %}
+{%     if (system.conntrack.timeout | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (system.conntrack.timeout.tcp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for key, value in system.conntrack.timeout.tcp.items() %}
+set system conntrack timeout tcp {{ key | replace("_", "-") }} '{{ value }}'
+{%             endfor %}
+{%         endif %}
+{%         if (system.conntrack.timeout.udp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for key, value in system.conntrack.timeout.udp.items() %}
+set system conntrack timeout udp {{ key | replace("_", "-") }} '{{ value }}'
+{%             endfor %}
+{%         endif %}
+{%         if (system.conntrack.timeout.icmp | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system conntrack timeout icmp '{{ system.conntrack.timeout.icmp }}'
+{%         endif %}
+{%         if (system.conntrack.timeout.other | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system conntrack timeout other '{{ system.conntrack.timeout.other }}'
+{%         endif %}
+{%     endif %}
+{% endif %}
+{# system console #}
+{% if (system.console | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.console.device | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for device_name, device_config in system.console.device.items() %}
+{%             if (device_config.speed | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system console device {{ device_name }} speed '{{ device_config.speed }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# system domain-name #}
+{% if (system.domain_name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system domain-name '{{ system.domain_name }}'
+{% endif %}
+{# system host-name #}
+{% if (system.host_name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system host-name '{{ system.host_name }}'
+{% endif %}
+{# system login #}
+{% if (system.login | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.login.banner | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (system.login.banner.post_login | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login banner post-login '{{ system.login.banner.post_login | replace('\n', '\\n') }}'
+{%         endif %}
+{%         if (system.login.banner.pre_login | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login banner pre-login '{{ system.login.banner.pre_login | replace('\n', '\\n') }}'
+{%         endif %}
+{%     endif %}
+{%     if (system.login.user | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for user, user_config in system.login.user.items() %}
+{%             if (user_config.encrypted_password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login user {{ user }} authentication encrypted-password '{{ user_config.encrypted_password }}'
+{%             endif %}
+{%             if (user_config.public_keys | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for key in user_config.public_keys %}
+{%                     if (key.key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login user {{ user }} authentication public-keys {{ key.name }} key '{{ key.key }}'
+{%                     endif %}
+{%                     if (key.type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login user {{ user }} authentication public-keys {{ key.name }} type '{{ key.type }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (system.login.radius | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (system.login.radius.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for server_addr, server_config in system.login.radius.server.items() %}
+{%                 if (server_config.key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login radius server {{ server_addr }} key '{{ server_config.key }}'
+{%                 endif %}
+{%                 if (server_config.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login radius server {{ server_addr }} port '{{ server_config.port }}'
+{%                 endif %}
+{%                 if (server_config.timeout | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login radius server {{ server_addr }} timeout '{{ server_config.timeout }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%         if (system.login.radius.source_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system login radius source-address '{{ system.login.radius.source_address }}'
+{%         endif %}
+{%     endif %}
+{% endif %}
+{# system name-server #}
+{% if (system.name_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%     for name_server in system.name_server %}
+set system name-server '{{ name_server }}'
+{%     endfor %}
+{% endif %}
+{# system syslog #}
+{% if (system.syslog | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.syslog.global | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (system.syslog.global.facility | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for facility_name, facility_config in system.syslog.global.facility.items() %}
+{%                 if (facility_config.level | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system syslog global facility {{ facility_name }} level '{{ facility_config.level }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endif %}
+{%     if (system.syslog.host | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for host_addr, host_config in system.syslog.host.items() %}
+{%             if (host_config.facility | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for facility_name, facility_config in host_config.facility.items() %}
+{%                     if (facility_config.level | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system syslog host {{ host_addr }} facility {{ facility_name }} level '{{ facility_config.level }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%             if (host_config.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system syslog host {{ host_addr }} port '{{ host_config.port }}'
+{%             endif %}
+{%             if (host_config.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system syslog host {{ host_addr }} protocol '{{ host_config.protocol }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# system time-zone #}
+{% if (system.time_zone | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system time-zone '{{ system.time_zone }}'
+{% endif %}
+{# system flow-accounting #}
+{% if (system.flow_accounting | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.flow_accounting.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for iface in system.flow_accounting.interface %}
+set system flow-accounting interface '{{ iface }}'
+{%         endfor %}
+{%     endif %}
+{%     if (system.flow_accounting.netflow | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (system.flow_accounting.netflow.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for server_addr, server_config in system.flow_accounting.netflow.server.items() %}
+{%                 if (server_config.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system flow-accounting netflow server {{ server_addr }} port '{{ server_config.port }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%         if (system.flow_accounting.netflow.version | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system flow-accounting netflow version '{{ system.flow_accounting.netflow.version }}'
+{%         endif %}
+{%         if (system.flow_accounting.netflow.timeout | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for key, value in system.flow_accounting.netflow.timeout.items() %}
+set system flow-accounting netflow timeout {{ key | replace("_", "-") }} '{{ value }}'
+{%             endfor %}
+{%         endif %}
+{%     endif %}
+{% endif %}
+{# system option #}
+{% if (system.option | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.option.performance | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system option performance '{{ system.option.performance }}'
+{%     endif %}
+{%     if (system.option.ctrl_alt_delete | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system option ctrl-alt-delete '{{ system.option.ctrl_alt_delete }}'
+{%     endif %}
+{%     if (system.option.reboot_on_panic | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set system option reboot-on-panic
+{%     endif %}
+{% endif %}
+{# system static-host-mapping #}
+{% if (system.static_host_mapping | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     for hostname, mapping_config in system.static_host_mapping.items() %}
+{%         if (mapping_config.inet | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system static-host-mapping host-name {{ hostname }} inet '{{ mapping_config.inet }}'
+{%         endif %}
+{%         if (mapping_config.alias | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for alias in mapping_config.alias %}
+set system static-host-mapping host-name {{ hostname }} alias '{{ alias }}'
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}
+{# system task-scheduler #}
+{% if (system.task_scheduler | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (system.task_scheduler.task | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for task_name, task_config in system.task_scheduler.task.items() %}
+{%             if (task_config.interval | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system task-scheduler task {{ task_name }} interval '{{ task_config.interval }}'
+{%             endif %}
+{%             if (task_config.crontab_spec | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system task-scheduler task {{ task_name }} crontab-spec '{{ task_config.crontab_spec }}'
+{%             endif %}
+{%             if (task_config.executable | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (task_config.executable.path | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system task-scheduler task {{ task_name }} executable path '{{ task_config.executable.path }}'
+{%                 endif %}
+{%                 if (task_config.executable.arguments | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system task-scheduler task {{ task_name }} executable arguments '{{ task_config.executable.arguments }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# sysctl parameters (top-level variable) #}
+{% if sysctl_parameter is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     for sysctl_key, value in sysctl_parameter.items() %}
+set system sysctl parameter {{ sysctl_key }} value '{{ value }}'
+{%     endfor %}
+{% endif %}

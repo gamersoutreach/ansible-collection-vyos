@@ -1,0 +1,369 @@
+{# bgp #}
+{% if (protocols.bgp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     set bgp = protocols.bgp %}
+{%     if (bgp.as | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp system-as '{{ bgp.as }}'
+{%     endif %}
+{# bgp parameters #}
+{%     if (bgp.parameters | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         set params = bgp.parameters %}
+{%         if (params.router_id | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp parameters router-id '{{ params.router_id }}'
+{%         endif %}
+{%         if (params.log_neighbor_changes | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp parameters log-neighbor-changes
+{%         endif %}
+{%         if (params.graceful_restart | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp parameters graceful-restart
+{%         endif %}
+{%         if (params.network_import_check | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp parameters network-import-check
+{%         endif %}
+{%         if (params.bestpath | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             if (params.bestpath.as_path | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (params.bestpath.as_path.multipath_relax | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp parameters bestpath as-path multipath-relax
+{%                 endif %}
+{%             endif %}
+{%         endif %}
+{%         if (params.confederation | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             if (params.confederation.identifier | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp parameters confederation identifier '{{ params.confederation.identifier }}'
+{%             endif %}
+{%             if (params.confederation.peers | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 for peer_asn in params.confederation.peers %}
+set protocols bgp parameters confederation peers '{{ peer_asn }}'
+{%                 endfor %}
+{%             endif %}
+{%         endif %}
+{%     endif %}
+{# bgp peer-groups #}
+{%     if (bgp.peer_group | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for pg_name, pg in bgp.peer_group.items() %}
+{%             if (pg.remote_as | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} remote-as '{{ pg.remote_as }}'
+{%             endif %}
+{%             if (pg.update_source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} update-source '{{ pg.update_source }}'
+{%             endif %}
+{%             if (pg.ebgp_multihop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} ebgp-multihop '{{ pg.ebgp_multihop }}'
+{%             endif %}
+{%             if (pg.password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} password '{{ pg.password }}'
+{%             endif %}
+{%             if (pg.capability | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (pg.capability.dynamic | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp peer-group {{ pg_name }} capability dynamic
+{%                 endif %}
+{%             endif %}
+{%             if (pg.address_family | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for af_name, af in pg.address_family.items() %}
+{%                     set af_cli = af_name | replace('_', '-') %}
+{%                     if (af.soft_reconfiguration | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} address-family {{ af_cli }} soft-reconfiguration {{ af.soft_reconfiguration }}
+{%                     endif %}
+{%                     if (af.route_map | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         if (af.route_map.import | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} address-family {{ af_cli }} route-map import '{{ af.route_map.import }}'
+{%                         endif %}
+{%                         if (af.route_map.export | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} address-family {{ af_cli }} route-map export '{{ af.route_map.export }}'
+{%                         endif %}
+{%                     endif %}
+{%                     if (af.prefix_list | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         if (af.prefix_list.import | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} address-family {{ af_cli }} prefix-list import '{{ af.prefix_list.import }}'
+{%                         endif %}
+{%                         if (af.prefix_list.export | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp peer-group {{ pg_name }} address-family {{ af_cli }} prefix-list export '{{ af.prefix_list.export }}'
+{%                         endif %}
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# bgp address-family ipv4-unicast #}
+{%     if (bgp.ipv4_unicast | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (bgp.ipv4_unicast.network | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for network in bgp.ipv4_unicast.network %}
+set protocols bgp address-family ipv4-unicast network {{ network }}
+{%             endfor %}
+{%         endif %}
+{%         if (bgp.ipv4_unicast.redistribute | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for redist_type, redist_cfg in bgp.ipv4_unicast.redistribute.items() %}
+{%                 if redist_cfg is gamersoutreach.vyos.vyos_defined(var_type="dict") and redist_cfg.keys() | list | length > 0 %}
+{%                     if (redist_cfg.route_map | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp address-family ipv4-unicast redistribute {{ redist_type }} route-map '{{ redist_cfg.route_map }}'
+{%                     endif %}
+{%                     if (redist_cfg.metric | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp address-family ipv4-unicast redistribute {{ redist_type }} metric '{{ redist_cfg.metric }}'
+{%                     endif %}
+{%                 else %}
+set protocols bgp address-family ipv4-unicast redistribute {{ redist_type }}
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%         if (bgp.ipv4_unicast.aggregate_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for agg in bgp.ipv4_unicast.aggregate_address %}
+{%                 if (agg.prefix | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (agg.summary_only | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp address-family ipv4-unicast aggregate-address {{ agg.prefix }} summary-only
+{%                     endif %}
+{%                     if (agg.as_set | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp address-family ipv4-unicast aggregate-address {{ agg.prefix }} as-set
+{%                     endif %}
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endif %}
+{# bgp address-family ipv6-unicast #}
+{%     if (bgp.ipv6_unicast | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (bgp.ipv6_unicast.network | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for network in bgp.ipv6_unicast.network %}
+set protocols bgp address-family ipv6-unicast network {{ network }}
+{%             endfor %}
+{%         endif %}
+{%         if (bgp.ipv6_unicast.redistribute | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for redist_type, redist_cfg in bgp.ipv6_unicast.redistribute.items() %}
+{%                 if redist_cfg is gamersoutreach.vyos.vyos_defined(var_type="dict") and redist_cfg.keys() | list | length > 0 %}
+{%                     if (redist_cfg.route_map | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp address-family ipv6-unicast redistribute {{ redist_type }} route-map '{{ redist_cfg.route_map }}'
+{%                     endif %}
+{%                     if (redist_cfg.metric | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp address-family ipv6-unicast redistribute {{ redist_type }} metric '{{ redist_cfg.metric }}'
+{%                     endif %}
+{%                 else %}
+set protocols bgp address-family ipv6-unicast redistribute {{ redist_type }}
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endif %}
+{# bgp neighbors #}
+{%     if (bgp.neighbors | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for neighbor in bgp.neighbors %}
+{%             set n = neighbor %}
+{%             set addr = n.ip_address %}
+{%             if (n.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} description '{{ n.description }}'
+{%             endif %}
+{%             if (n.remote_as | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} remote-as '{{ n.remote_as }}'
+{%             endif %}
+{%             if (n.password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} password '{{ n.password }}'
+{%             endif %}
+{%             if (n.ebgp_multihop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} ebgp-multihop '{{ n.ebgp_multihop }}'
+{%             endif %}
+{%             if (n.update_source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} update-source '{{ n.update_source }}'
+{%             endif %}
+{%             if (n.peer_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} peer-group '{{ n.peer_group }}'
+{%             endif %}
+{%             if (n.shutdown | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp neighbor {{ addr }} shutdown
+{%             endif %}
+{%             if (n.disable_connected_check | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp neighbor {{ addr }} disable-connected-check
+{%             endif %}
+{%             if (n.bfd | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols bgp neighbor {{ addr }} bfd
+{%             endif %}
+{%             if (n.timers | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (n.timers.keepalive | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} timers keepalive '{{ n.timers.keepalive }}'
+{%                 endif %}
+{%                 if (n.timers.holdtime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} timers holdtime '{{ n.timers.holdtime }}'
+{%                 endif %}
+{%             endif %}
+{%             for af_name in ['ipv4_unicast', 'ipv6_unicast'] %}
+{%                 set af = n[af_name] | default(none) %}
+{%                 set af_cli = af_name | replace('_', '-') %}
+{%                 if af is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     if (af.soft_reconfiguration | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} address-family {{ af_cli }} soft-reconfiguration {{ af.soft_reconfiguration }}
+{%                     endif %}
+{%                     if (af.prefix_list | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         if (af.prefix_list.import | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} address-family {{ af_cli }} prefix-list import '{{ af.prefix_list.import }}'
+{%                         endif %}
+{%                         if (af.prefix_list.export | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} address-family {{ af_cli }} prefix-list export '{{ af.prefix_list.export }}'
+{%                         endif %}
+{%                     endif %}
+{%                     if (af.route_map | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         if (af.route_map.import | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} address-family {{ af_cli }} route-map import '{{ af.route_map.import }}'
+{%                         endif %}
+{%                         if (af.route_map.export | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols bgp neighbor {{ addr }} address-family {{ af_cli }} route-map export '{{ af.route_map.export }}'
+{%                         endif %}
+{%                     endif %}
+{%                 endif %}
+{%             endfor %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# static routes #}
+{% if (protocols.static | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (protocols.static.route | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for prefix, cfg in protocols.static.route.items() %}
+{%             if (cfg.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route {{ prefix }} next-hop {{ cfg.next_hop }}
+{%                 if (cfg.distance | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route {{ prefix }} next-hop {{ cfg.next_hop }} distance '{{ cfg.distance }}'
+{%                 endif %}
+{%             elif (cfg.blackhole | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols static route {{ prefix }} blackhole
+{%                 if (cfg.distance | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route {{ prefix }} blackhole distance '{{ cfg.distance }}'
+{%                 endif %}
+{%             elif (cfg.interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route {{ prefix }} interface {{ cfg.interface }}
+{%             endif %}
+{%             if (cfg.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route {{ prefix }} description '{{ cfg.description }}'
+{%             endif %}
+{%             if (cfg.table | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route {{ prefix }} table '{{ cfg.table }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (protocols.static.route6 | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for prefix, cfg in protocols.static.route6.items() %}
+{%             if (cfg.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route6 {{ prefix }} next-hop {{ cfg.next_hop }}
+{%                 if (cfg.distance | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route6 {{ prefix }} next-hop {{ cfg.next_hop }} distance '{{ cfg.distance }}'
+{%                 endif %}
+{%             elif (cfg.blackhole | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols static route6 {{ prefix }} blackhole
+{%                 if (cfg.distance | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route6 {{ prefix }} blackhole distance '{{ cfg.distance }}'
+{%                 endif %}
+{%             elif (cfg.interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route6 {{ prefix }} interface {{ cfg.interface }}
+{%             endif %}
+{%             if (cfg.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route6 {{ prefix }} description '{{ cfg.description }}'
+{%             endif %}
+{%             if (cfg.table | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols static route6 {{ prefix }} table '{{ cfg.table }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# ospf #}
+{% if (protocols.ospf | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     set ospf = protocols.ospf %}
+{%     if (ospf.parameters | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (ospf.parameters.router_id | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf parameters router-id '{{ ospf.parameters.router_id }}'
+{%         endif %}
+{%         if (ospf.parameters.abr_type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf parameters abr-type '{{ ospf.parameters.abr_type }}'
+{%         endif %}
+{%     endif %}
+{%     if (ospf.area | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for area_id, area_cfg in ospf.area.items() %}
+{%             if (area_cfg.network | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 for network in area_cfg.network %}
+set protocols ospf area {{ area_id }} network '{{ network }}'
+{%                 endfor %}
+{%             endif %}
+{%             if (area_cfg.area_type | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (area_cfg.area_type.stub | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols ospf area {{ area_id }} area-type stub
+{%                     if (area_cfg.area_type.default_cost | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf area {{ area_id }} area-type stub default-cost '{{ area_cfg.area_type.default_cost }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (area_cfg.area_type.nssa | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols ospf area {{ area_id }} area-type nssa
+{%                 endif %}
+{%             endif %}
+{%             if (area_cfg.authentication | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf area {{ area_id }} authentication '{{ area_cfg.authentication }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (ospf.passive_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for iface in ospf.passive_interface %}
+set protocols ospf passive-interface '{{ iface }}'
+{%         endfor %}
+{%     endif %}
+{%     if (ospf.default_information | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (ospf.default_information.originate | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             set orig = ospf.default_information.originate %}
+{%             if (orig.always | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols ospf default-information originate always
+{%             endif %}
+{%             if (orig.metric | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf default-information originate metric '{{ orig.metric }}'
+{%             endif %}
+{%             if (orig.metric_type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf default-information originate metric-type '{{ orig.metric_type }}'
+{%             endif %}
+{%             if (orig.route_map | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf default-information originate route-map '{{ orig.route_map }}'
+{%             endif %}
+{%         endif %}
+{%     endif %}
+{%     if (ospf.redistribute | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for redist_type, redist_cfg in ospf.redistribute.items() %}
+{%             if redist_cfg is gamersoutreach.vyos.vyos_defined(var_type="dict") and redist_cfg.keys() | list | length > 0 %}
+{%                 if (redist_cfg.route_map | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf redistribute {{ redist_type }} route-map '{{ redist_cfg.route_map }}'
+{%                 endif %}
+{%                 if (redist_cfg.metric | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf redistribute {{ redist_type }} metric '{{ redist_cfg.metric }}'
+{%                 endif %}
+{%                 if (redist_cfg.metric_type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospf redistribute {{ redist_type }} metric-type '{{ redist_cfg.metric_type }}'
+{%                 endif %}
+{%             else %}
+set protocols ospf redistribute {{ redist_type }}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (ospf.log_adjacency_changes | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set protocols ospf log-adjacency-changes
+{%     endif %}
+{% endif %}
+{# ospfv3 #}
+{% if (protocols.ospfv3 | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     set ospfv3 = protocols.ospfv3 %}
+{%     if (ospfv3.parameters | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (ospfv3.parameters.router_id | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospfv3 parameters router-id '{{ ospfv3.parameters.router_id }}'
+{%         endif %}
+{%     endif %}
+{%     if (ospfv3.area | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for area_id, area_cfg in ospfv3.area.items() %}
+{%             if (area_cfg.interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 for iface in area_cfg.interface %}
+set protocols ospfv3 area {{ area_id }} interface '{{ iface }}'
+{%                 endfor %}
+{%             endif %}
+{%             if (area_cfg.range | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 for range_prefix in area_cfg.range %}
+set protocols ospfv3 area {{ area_id }} range '{{ range_prefix }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (ospfv3.redistribute | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for redist_type, redist_cfg in ospfv3.redistribute.items() %}
+{%             if redist_cfg is gamersoutreach.vyos.vyos_defined(var_type="dict") and redist_cfg.keys() | list | length > 0 %}
+{%                 if (redist_cfg.route_map | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set protocols ospfv3 redistribute {{ redist_type }} route-map '{{ redist_cfg.route_map }}'
+{%                 endif %}
+{%             else %}
+set protocols ospfv3 redistribute {{ redist_type }}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}

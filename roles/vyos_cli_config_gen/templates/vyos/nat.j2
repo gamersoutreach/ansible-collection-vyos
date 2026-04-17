@@ -1,0 +1,172 @@
+{# source nat #}
+{% if (nat.source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     if (nat.source.rule | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for rule, rule_config in nat.source.rule.items() %}
+{%             if (rule_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} description '{{ rule_config.description }}'
+{%             endif %}
+{%             if (rule_config.disable | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set nat source rule {{ rule }} disable
+{%             endif %}
+{%             if (rule_config.log | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set nat source rule {{ rule }} log
+{%             endif %}
+{%             if (rule_config.exclude | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set nat source rule {{ rule }} exclude
+{%             endif %}
+{%             if (rule_config.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} protocol '{{ rule_config.protocol }}'
+{%             endif %}
+{%             if (rule_config.outbound_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.outbound_interface.name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} outbound-interface name '{{ rule_config.outbound_interface.name }}'
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.source.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} source address '{{ rule_config.source.address }}'
+{%                 endif %}
+{%                 if (rule_config.source.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} source port '{{ rule_config.source.port }}'
+{%                 endif %}
+{%                 if (rule_config.source.group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.source.group.address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} source group address-group '{{ rule_config.source.group.address_group }}'
+{%                     endif %}
+{%                     if (rule_config.source.group.network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} source group network-group '{{ rule_config.source.group.network_group }}'
+{%                     endif %}
+{%                     if (rule_config.source.group.port_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} source group port-group '{{ rule_config.source.group.port_group }}'
+{%                     endif %}
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.destination | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.destination.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} destination address '{{ rule_config.destination.address }}'
+{%                 endif %}
+{%                 if (rule_config.destination.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} destination port '{{ rule_config.destination.port }}'
+{%                 endif %}
+{%                 if (rule_config.destination.group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.destination.group.address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} destination group address-group '{{ rule_config.destination.group.address_group }}'
+{%                     endif %}
+{%                     if (rule_config.destination.group.network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} destination group network-group '{{ rule_config.destination.group.network_group }}'
+{%                     endif %}
+{%                     if (rule_config.destination.group.port_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} destination group port-group '{{ rule_config.destination.group.port_group }}'
+{%                     endif %}
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.translation | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.translation.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} translation address '{{ rule_config.translation.address }}'
+{%                 endif %}
+{%                 if (rule_config.translation.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat source rule {{ rule }} translation port '{{ rule_config.translation.port }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# destination nat #}
+{% if (nat.destination | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     if (nat.destination.rule | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for rule, rule_config in nat.destination.rule.items() %}
+{%             if (rule_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} description '{{ rule_config.description }}'
+{%             endif %}
+{%             if (rule_config.disable | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set nat destination rule {{ rule }} disable
+{%             endif %}
+{%             if (rule_config.log | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set nat destination rule {{ rule }} log
+{%             endif %}
+{%             if (rule_config.exclude | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set nat destination rule {{ rule }} exclude
+{%             endif %}
+{%             if (rule_config.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} protocol '{{ rule_config.protocol }}'
+{%             endif %}
+{%             if (rule_config.inbound_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.inbound_interface.name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} inbound-interface name '{{ rule_config.inbound_interface.name }}'
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.source.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} source address '{{ rule_config.source.address }}'
+{%                 endif %}
+{%                 if (rule_config.source.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} source port '{{ rule_config.source.port }}'
+{%                 endif %}
+{%                 if (rule_config.source.group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.source.group.address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} source group address-group '{{ rule_config.source.group.address_group }}'
+{%                     endif %}
+{%                     if (rule_config.source.group.network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} source group network-group '{{ rule_config.source.group.network_group }}'
+{%                     endif %}
+{%                     if (rule_config.source.group.port_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} source group port-group '{{ rule_config.source.group.port_group }}'
+{%                     endif %}
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.destination | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.destination.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} destination address '{{ rule_config.destination.address }}'
+{%                 endif %}
+{%                 if (rule_config.destination.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} destination port '{{ rule_config.destination.port }}'
+{%                 endif %}
+{%                 if (rule_config.destination.group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.destination.group.address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} destination group address-group '{{ rule_config.destination.group.address_group }}'
+{%                     endif %}
+{%                     if (rule_config.destination.group.network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} destination group network-group '{{ rule_config.destination.group.network_group }}'
+{%                     endif %}
+{%                     if (rule_config.destination.group.port_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} destination group port-group '{{ rule_config.destination.group.port_group }}'
+{%                     endif %}
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.translation | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.translation.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} translation address '{{ rule_config.translation.address }}'
+{%                 endif %}
+{%                 if (rule_config.translation.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat destination rule {{ rule }} translation port '{{ rule_config.translation.port }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
+{# static nat #}
+{% if (nat.static | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     if (nat.static.rule | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for rule, rule_config in nat.static.rule.items() %}
+{%             if (rule_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat static rule {{ rule }} description '{{ rule_config.description }}'
+{%             endif %}
+{%             if (rule_config.disable | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set nat static rule {{ rule }} disable
+{%             endif %}
+{%             if (rule_config.inbound_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat static rule {{ rule }} inbound-interface '{{ rule_config.inbound_interface }}'
+{%             endif %}
+{%             if (rule_config.destination | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.destination.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat static rule {{ rule }} destination address '{{ rule_config.destination.address }}'
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.translation | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (rule_config.translation.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set nat static rule {{ rule }} translation address '{{ rule_config.translation.address }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}

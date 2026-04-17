@@ -1,0 +1,326 @@
+{# ipsec esp groups #}
+{% if (vpn.ipsec | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (vpn.ipsec.esp_group | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for group_name, group in vpn.ipsec.esp_group.items() %}
+{%             if (group.proposal | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for prop_id, prop in group.proposal.items() %}
+{%                     if (prop.encryption | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec esp-group {{ group_name }} proposal {{ prop_id }} encryption '{{ prop.encryption }}'
+{%                     endif %}
+{%                     if (prop.hash | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec esp-group {{ group_name }} proposal {{ prop_id }} hash '{{ prop.hash }}'
+{%                     endif %}
+{%                     if (prop.dh_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec esp-group {{ group_name }} proposal {{ prop_id }} dh-group '{{ prop.dh_group }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%             if (group.lifetime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec esp-group {{ group_name }} lifetime '{{ group.lifetime }}'
+{%             endif %}
+{%             if (group.pfs | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec esp-group {{ group_name }} pfs '{{ group.pfs }}'
+{%             endif %}
+{%             if (group.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec esp-group {{ group_name }} mode '{{ group.mode }}'
+{%             endif %}
+{%             if (group.compression | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set vpn ipsec esp-group {{ group_name }} compression
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# ipsec ike groups #}
+{%     if (vpn.ipsec.ike_group | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for group_name, group in vpn.ipsec.ike_group.items() %}
+{%             if (group.proposal | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for prop_id, prop in group.proposal.items() %}
+{%                     if (prop.encryption | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} proposal {{ prop_id }} encryption '{{ prop.encryption }}'
+{%                     endif %}
+{%                     if (prop.hash | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} proposal {{ prop_id }} hash '{{ prop.hash }}'
+{%                     endif %}
+{%                     if (prop.dh_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} proposal {{ prop_id }} dh-group '{{ prop.dh_group }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%             if (group.lifetime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} lifetime '{{ group.lifetime }}'
+{%             endif %}
+{%             if (group.key_exchange | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} key-exchange '{{ group.key_exchange }}'
+{%             endif %}
+{%             if (group.dead_peer_detection | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 set dpd = group.dead_peer_detection %}
+{%                 if (dpd.action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} dead-peer-detection action '{{ dpd.action }}'
+{%                 endif %}
+{%                 if (dpd.interval | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} dead-peer-detection interval '{{ dpd.interval }}'
+{%                 endif %}
+{%                 if (dpd.timeout | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec ike-group {{ group_name }} dead-peer-detection timeout '{{ dpd.timeout }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# ipsec interface #}
+{%     if (vpn.ipsec.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%         for iface in vpn.ipsec.interface %}
+set vpn ipsec interface '{{ iface }}'
+{%         endfor %}
+{%     endif %}
+{# ipsec options #}
+{%     if (vpn.ipsec.options | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (vpn.ipsec.options.disable_route_autoinstall | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set vpn ipsec options disable-route-autoinstall
+{%         endif %}
+{%         if (vpn.ipsec.options.flexvpn | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set vpn ipsec options flexvpn
+{%         endif %}
+{%     endif %}
+{# ipsec site-to-site peers #}
+{%     if (vpn.ipsec.site_to_site | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (vpn.ipsec.site_to_site.peer | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for peer_name, peer in vpn.ipsec.site_to_site.peer.items() %}
+{%                 if (peer.remote_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} remote-address '{{ peer.remote_address }}'
+{%                 endif %}
+{%                 if (peer.authentication | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     set auth = peer.authentication %}
+{%                     if (auth.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} authentication mode '{{ auth.mode }}'
+{%                     endif %}
+{%                     if (auth.pre_shared_secret | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} authentication pre-shared-secret '{{ auth.pre_shared_secret }}'
+{%                     endif %}
+{%                     if (auth.id | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} authentication id '{{ auth.id }}'
+{%                     endif %}
+{%                     if (auth.remote_id | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} authentication remote-id '{{ auth.remote_id }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (peer.connection_type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} connection-type '{{ peer.connection_type }}'
+{%                 endif %}
+{%                 if (peer.default_esp_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} default-esp-group '{{ peer.default_esp_group }}'
+{%                 endif %}
+{%                 if (peer.ike_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} ike-group '{{ peer.ike_group }}'
+{%                 endif %}
+{%                 if (peer.local_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} local-address '{{ peer.local_address }}'
+{%                 endif %}
+{%                 if (peer.tunnel | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     for tun_id, tun in peer.tunnel.items() %}
+{%                         if (tun.esp_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} tunnel {{ tun_id }} esp-group '{{ tun.esp_group }}'
+{%                         endif %}
+{%                         if (tun.local | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                             if (tun.local.prefix | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} tunnel {{ tun_id }} local prefix '{{ tun.local.prefix }}'
+{%                             endif %}
+{%                         endif %}
+{%                         if (tun.remote | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                             if (tun.remote.prefix | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} tunnel {{ tun_id }} remote prefix '{{ tun.remote.prefix }}'
+{%                             endif %}
+{%                         endif %}
+{%                         if (tun.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} tunnel {{ tun_id }} protocol '{{ tun.protocol }}'
+{%                         endif %}
+{%                     endfor %}
+{%                 endif %}
+{%                 if (peer.vti | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     if (peer.vti.bind | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} vti bind '{{ peer.vti.bind }}'
+{%                     endif %}
+{%                     if (peer.vti.esp_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn ipsec site-to-site peer {{ peer_name }} vti esp-group '{{ peer.vti.esp_group }}'
+{%                     endif %}
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endif %}
+{% endif %}
+{# l2tp remote access #}
+{% if (vpn.l2tp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     if (vpn.l2tp.remote_access | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         set ra = vpn.l2tp.remote_access %}
+{%         if (ra.authentication | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             set auth = ra.authentication %}
+{%             if (auth.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access authentication mode '{{ auth.mode }}'
+{%             endif %}
+{%             if (auth.local_users | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for username, user in auth.local_users.items() %}
+{%                     if (user.password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access authentication local-users username {{ username }} password '{{ user.password }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%             if (auth.protocols | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for proto in auth.protocols %}
+set vpn l2tp remote-access authentication protocols '{{ proto }}'
+{%                 endfor %}
+{%             endif %}
+{%             if (auth.radius | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (auth.radius.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     for server_addr, server in auth.radius.server.items() %}
+{%                         if (server.key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access authentication radius server {{ server_addr }} key '{{ server.key }}'
+{%                         endif %}
+{%                         if (server.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access authentication radius server {{ server_addr }} port '{{ server.port }}'
+{%                         endif %}
+{%                     endfor %}
+{%                 endif %}
+{%             endif %}
+{%         endif %}
+{%         if (ra.client_ip_pool | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for pool_name, pool in ra.client_ip_pool.items() %}
+{%                 if (pool.range | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access client-ip-pool {{ pool_name }} range '{{ pool.range }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%         if (ra.default_pool | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access default-pool '{{ ra.default_pool }}'
+{%         endif %}
+{%         if (ra.gateway_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access gateway-address '{{ ra.gateway_address }}'
+{%         endif %}
+{%         if (ra.ipsec_settings | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             set ipsec = ra.ipsec_settings %}
+{%             if (ipsec.authentication | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (ipsec.authentication.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access ipsec-settings authentication mode '{{ ipsec.authentication.mode }}'
+{%                 endif %}
+{%                 if (ipsec.authentication.pre_shared_secret | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access ipsec-settings authentication pre-shared-secret '{{ ipsec.authentication.pre_shared_secret }}'
+{%                 endif %}
+{%             endif %}
+{%             if (ipsec.ike_lifetime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access ipsec-settings ike-lifetime '{{ ipsec.ike_lifetime }}'
+{%             endif %}
+{%             if (ipsec.lifetime | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn l2tp remote-access ipsec-settings lifetime '{{ ipsec.lifetime }}'
+{%             endif %}
+{%         endif %}
+{%     endif %}
+{% endif %}
+{# openconnect #}
+{% if (vpn.openconnect | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     set oc = vpn.openconnect %}
+{%     if (oc.authentication | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (oc.authentication.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect authentication mode '{{ oc.authentication.mode }}'
+{%         endif %}
+{%         if (oc.authentication.local_users | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for username, user in oc.authentication.local_users.items() %}
+{%                 if (user.password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect authentication local-users username {{ username }} password '{{ user.password }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%         if (oc.authentication.radius | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             if (oc.authentication.radius.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for server_addr, server in oc.authentication.radius.server.items() %}
+{%                     if (server.key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect authentication radius server {{ server_addr }} key '{{ server.key }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endif %}
+{%     endif %}
+{%     if (oc.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect listen-address '{{ oc.listen_address }}'
+{%     endif %}
+{%     if (oc.listen_port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect listen-port '{{ oc.listen_port }}'
+{%     endif %}
+{%     if (oc.network_settings | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         set ns = oc.network_settings %}
+{%         if (ns.client_ip_pool | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             if (ns.client_ip_pool.start | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect network-settings client-ip-pool start '{{ ns.client_ip_pool.start }}'
+{%             endif %}
+{%             if (ns.client_ip_pool.stop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect network-settings client-ip-pool stop '{{ ns.client_ip_pool.stop }}'
+{%             endif %}
+{%         endif %}
+{%         if (ns.name_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for server in ns.name_server %}
+set vpn openconnect network-settings name-server '{{ server }}'
+{%             endfor %}
+{%         endif %}
+{%         if (ns.push_route | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for route in ns.push_route %}
+set vpn openconnect network-settings push-route '{{ route }}'
+{%             endfor %}
+{%         endif %}
+{%     endif %}
+{%     if (oc.ssl | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (oc.ssl.ca_certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect ssl ca-certificate '{{ oc.ssl.ca_certificate }}'
+{%         endif %}
+{%         if (oc.ssl.certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn openconnect ssl certificate '{{ oc.ssl.certificate }}'
+{%         endif %}
+{%     endif %}
+{% endif %}
+{# sstp #}
+{% if (vpn.sstp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     set sstp = vpn.sstp %}
+{%     if (sstp.authentication | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         set auth = sstp.authentication %}
+{%         if (auth.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp authentication mode '{{ auth.mode }}'
+{%         endif %}
+{%         if (auth.local_users | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             for username, user in auth.local_users.items() %}
+{%                 if (user.password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp authentication local-users username {{ username }} password '{{ user.password }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%         if (auth.protocols | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for proto in auth.protocols %}
+set vpn sstp authentication protocols '{{ proto }}'
+{%             endfor %}
+{%         endif %}
+{%         if (auth.radius | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%             if (auth.radius.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for server_addr, server in auth.radius.server.items() %}
+{%                     if (server.key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp authentication radius server {{ server_addr }} key '{{ server.key }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endif %}
+{%     endif %}
+{%     if (sstp.client_ip_pool | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for pool_name, pool in sstp.client_ip_pool.items() %}
+{%             if (pool.range | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp client-ip-pool {{ pool_name }} range '{{ pool.range }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (sstp.default_pool | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp default-pool '{{ sstp.default_pool }}'
+{%     endif %}
+{%     if (sstp.gateway_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp gateway-address '{{ sstp.gateway_address }}'
+{%     endif %}
+{%     if (sstp.ssl | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (sstp.ssl.ca_certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp ssl ca-certificate '{{ sstp.ssl.ca_certificate }}'
+{%         endif %}
+{%         if (sstp.ssl.certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set vpn sstp ssl certificate '{{ sstp.ssl.certificate }}'
+{%         endif %}
+{%     endif %}
+{% endif %}

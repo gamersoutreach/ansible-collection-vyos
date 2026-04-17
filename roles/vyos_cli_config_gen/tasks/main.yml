@@ -1,0 +1,24 @@
+---
+- name: Create required output directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ vyos_cli_config_gen_config_dir }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Generate vyos intended configuration
+  ansible.builtin.template:
+    src: vyos-intended-config.j2
+    dest: "{{ vyos_cli_config_gen_config_dir }}/{{ inventory_hostname }}.cfg"
+    mode: "0644"
+  delegate_to: localhost
+
+- name: Sort intended configuration to match VyOS canonical order
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.file', vyos_cli_config_gen_config_dir ~ '/' ~ inventory_hostname ~ '.cfg') | gamersoutreach.vyos.vyos_sort_config }}"
+    dest: "{{ vyos_cli_config_gen_config_dir }}/{{ inventory_hostname }}.cfg"
+    mode: "0644"
+  delegate_to: localhost

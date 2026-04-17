@@ -1,0 +1,17 @@
+{% if (policy.community_list | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     for name, config in policy.community_list.items() %}
+{%         if (config.rules | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for rule, rule_config in config.rules.items() %}
+{%                 if (rule_config.action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy community-list {{ name }} rule {{ rule }} action '{{ rule_config.action }}'
+{%                 endif %}
+{%                 if (rule_config.regex | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy community-list {{ name }} rule {{ rule }} regex '{{ rule_config.regex }}'
+{%                 endif %}
+{%                 if (rule_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy community-list {{ name }} rule {{ rule }} description '{{ rule_config.description }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}

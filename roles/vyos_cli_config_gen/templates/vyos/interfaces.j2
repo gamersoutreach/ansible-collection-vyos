@@ -1,0 +1,236 @@
+{% if interfaces is gamersoutreach.vyos.vyos_defined %}
+{%     for type, type_config in interfaces.items() %}
+{%         for interface, ifc in type_config.items() %}
+{# common options #}
+{%             if (ifc.address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for address in ifc.address %}
+set interfaces {{ type }} {{ interface }} address '{{ address }}'
+{%                 endfor %}
+{%             elif (ifc.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} address '{{ ifc.address }}'
+{%             endif %}
+{%             if (ifc.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} description '{{ ifc.description }}'
+{%             endif %}
+{%             if (ifc.mtu | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} mtu '{{ ifc.mtu }}'
+{%             endif %}
+{%             if (ifc.disable | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} disable
+{%             endif %}
+{%             if (ifc.vrf | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vrf '{{ ifc.vrf }}'
+{%             endif %}
+{%             if (ifc.ip | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (ifc.ip.enable_arp_ignore | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} ip enable-arp-ignore
+{%                 endif %}
+{%             endif %}
+{%             if (ifc.ipv6 | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                 if (ifc.ipv6.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.ipv6.address.autoconf | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} ipv6 address autoconf
+{%                     endif %}
+{%                 endif %}
+{%                 if (ifc.ipv6.disable_forwarding | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} ipv6 disable-forwarding
+{%                 endif %}
+{%             endif %}
+{# ethernet #}
+{%             if type == 'ethernet' %}
+{%                 if (ifc.hw_id | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} hw-id '{{ ifc.hw_id }}'
+{%                 endif %}
+{%                 if (ifc.duplex | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} duplex '{{ ifc.duplex }}'
+{%                 endif %}
+{%                 if (ifc.speed | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} speed '{{ ifc.speed }}'
+{%                 endif %}
+{%                 if (ifc.offload | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.offload.gro | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} offload gro
+{%                     endif %}
+{%                     if (ifc.offload.gso | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} offload gso
+{%                     endif %}
+{%                     if (ifc.offload.sg | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} offload sg
+{%                     endif %}
+{%                     if (ifc.offload.tso | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} offload tso
+{%                     endif %}
+{%                 endif %}
+{%                 if (ifc.vif | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     for vif_id, vif_config in ifc.vif.items() %}
+{%                         if (vif_config.address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                             for address in vif_config.address %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} address '{{ address }}'
+{%                             endfor %}
+{%                         elif (vif_config.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} address '{{ vif_config.address }}'
+{%                         endif %}
+{%                         if (vif_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} description '{{ vif_config.description }}'
+{%                         endif %}
+{%                         if (vif_config.mtu | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} mtu '{{ vif_config.mtu }}'
+{%                         endif %}
+{%                     endfor %}
+{%                 endif %}
+{# bonding #}
+{%             elif type == 'bonding' %}
+{%                 if (ifc.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} mode '{{ ifc.mode }}'
+{%                 endif %}
+{%                 if (ifc.hash_policy | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} hash-policy '{{ ifc.hash_policy }}'
+{%                 endif %}
+{%                 if (ifc.member | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.member.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                         for member_ifc in ifc.member.interface %}
+set interfaces {{ type }} {{ interface }} member interface '{{ member_ifc }}'
+{%                         endfor %}
+{%                     endif %}
+{%                 endif %}
+{# bridge #}
+{%             elif type == 'bridge' %}
+{%                 if (ifc.member | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.member.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                         for member_ifc in ifc.member.interface %}
+set interfaces {{ type }} {{ interface }} member interface '{{ member_ifc }}'
+{%                         endfor %}
+{%                     endif %}
+{%                 endif %}
+{%                 if (ifc.stp | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} stp
+{%                 endif %}
+{# tunnel #}
+{%             elif type == 'tunnel' %}
+{%                 if (ifc.encapsulation | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} encapsulation '{{ ifc.encapsulation }}'
+{%                 endif %}
+{%                 if (ifc.source_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} source-address '{{ ifc.source_address }}'
+{%                 endif %}
+{%                 if (ifc.remote | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} remote '{{ ifc.remote }}'
+{%                 endif %}
+{%                 if (ifc.source_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} source-interface '{{ ifc.source_interface }}'
+{%                 endif %}
+{%                 if (ifc.parameters | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.parameters.ip | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (ifc.parameters.ip.key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} parameters ip key '{{ ifc.parameters.ip.key }}'
+{%                         endif %}
+{%                     endif %}
+{%                 endif %}
+{# vxlan #}
+{%             elif type == 'vxlan' %}
+{%                 if (ifc.vni | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vni '{{ ifc.vni }}'
+{%                 endif %}
+{%                 if (ifc.source_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} source-address '{{ ifc.source_address }}'
+{%                 endif %}
+{%                 if (ifc.remote | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} remote '{{ ifc.remote }}'
+{%                 endif %}
+{%                 if (ifc.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} port '{{ ifc.port }}'
+{%                 endif %}
+{# wireguard #}
+{%             elif type == 'wireguard' %}
+{%                 if (ifc.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} port '{{ ifc.port }}'
+{%                 endif %}
+{%                 if (ifc.private_key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} private-key '{{ ifc.private_key }}'
+{%                 endif %}
+{%                 if (ifc.peers | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     for peer, peer_config in ifc.peers.items() %}
+{%                         if (peer_config.allowed_ips | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                             for allowed_ip in peer_config.allowed_ips %}
+set interfaces {{ type }} {{ interface }} peer {{ peer }} allowed-ips '{{ allowed_ip }}'
+{%                             endfor %}
+{%                         endif %}
+{%                         if (peer_config.public_key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} peer {{ peer }} public-key '{{ peer_config.public_key }}'
+{%                         endif %}
+{%                         if (peer_config.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} peer {{ peer }} address '{{ peer_config.address }}'
+{%                         endif %}
+{%                         if (peer_config.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} peer {{ peer }} port '{{ peer_config.port }}'
+{%                         endif %}
+{%                         if (peer_config.persistent_keepalive | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} peer {{ peer }} persistent-keepalive '{{ peer_config.persistent_keepalive }}'
+{%                         endif %}
+{%                         if (peer_config.preshared_key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} peer {{ peer }} preshared-key '{{ peer_config.preshared_key }}'
+{%                         endif %}
+{%                         if (peer_config.disable | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set interfaces {{ type }} {{ interface }} peer {{ peer }} disable
+{%                         endif %}
+{%                     endfor %}
+{%                 endif %}
+{# openvpn #}
+{%             elif type == 'openvpn' %}
+{%                 if (ifc.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} mode '{{ ifc.mode }}'
+{%                 endif %}
+{%                 if (ifc.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} protocol '{{ ifc.protocol }}'
+{%                 endif %}
+{%                 if (ifc.local_host | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} local-host '{{ ifc.local_host }}'
+{%                 endif %}
+{%                 if (ifc.local_port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} local-port '{{ ifc.local_port }}'
+{%                 endif %}
+{%                 if (ifc.remote_host | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} remote-host '{{ ifc.remote_host }}'
+{%                 endif %}
+{%                 if (ifc.remote_port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} remote-port '{{ ifc.remote_port }}'
+{%                 endif %}
+{%                 if (ifc.shared_secret_key | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} shared-secret-key '{{ ifc.shared_secret_key }}'
+{%                 endif %}
+{%                 if (ifc.encryption | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.encryption.cipher | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} encryption cipher '{{ ifc.encryption.cipher }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (ifc.tls | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.tls.ca_certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} tls ca-certificate '{{ ifc.tls.ca_certificate }}'
+{%                     endif %}
+{%                     if (ifc.tls.certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} tls certificate '{{ ifc.tls.certificate }}'
+{%                     endif %}
+{%                 endif %}
+{# pppoe #}
+{%             elif type == 'pppoe' %}
+{%                 if (ifc.authentication | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (ifc.authentication.username | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} authentication username '{{ ifc.authentication.username }}'
+{%                     endif %}
+{%                     if (ifc.authentication.password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} authentication password '{{ ifc.authentication.password }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (ifc.default_route | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} default-route '{{ ifc.default_route }}'
+{%                 endif %}
+{%                 if (ifc.name_server | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} name-server '{{ ifc.name_server }}'
+{%                 endif %}
+{%                 if (ifc.source_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} source-interface '{{ ifc.source_interface }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endfor %}
+{% endif %}

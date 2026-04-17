@@ -1,0 +1,120 @@
+{% if (policy.route_map | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     for name, config in policy.route_map.items() %}
+{%         if (config.rules | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for rule, rule_config in config.rules.items() %}
+{%                 if (rule_config.action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} action '{{ rule_config.action }}'
+{%                 endif %}
+{%                 if (rule_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} description '{{ rule_config.description }}'
+{%                 endif %}
+{%                 if (rule_config.match | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.match.as_path | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match as-path '{{ rule_config.match.as_path }}'
+{%                     endif %}
+{%                     if (rule_config.match.community | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.match.community.community_list | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match community community-list '{{ rule_config.match.community.community_list }}'
+{%                         endif %}
+{%                     endif %}
+{%                     if (rule_config.match.interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match interface '{{ rule_config.match.interface }}'
+{%                     endif %}
+{%                     if (rule_config.match.ip | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.match.ip.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                             if (rule_config.match.ip.address.prefix_list | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match ip address prefix-list '{{ rule_config.match.ip.address.prefix_list }}'
+{%                             endif %}
+{%                         endif %}
+{%                         if (rule_config.match.ip.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                             if (rule_config.match.ip.next_hop.prefix_list | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match ip next-hop prefix-list '{{ rule_config.match.ip.next_hop.prefix_list }}'
+{%                             endif %}
+{%                         endif %}
+{%                     endif %}
+{%                     if (rule_config.match.ipv6 | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.match.ipv6.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                             if (rule_config.match.ipv6.address.prefix_list | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match ipv6 address prefix-list '{{ rule_config.match.ipv6.address.prefix_list }}'
+{%                             endif %}
+{%                         endif %}
+{%                         if (rule_config.match.ipv6.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match ipv6 next-hop '{{ rule_config.match.ipv6.next_hop }}'
+{%                         endif %}
+{%                     endif %}
+{%                     if (rule_config.match.metric | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match metric '{{ rule_config.match.metric }}'
+{%                     endif %}
+{%                     if (rule_config.match.origin | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match origin '{{ rule_config.match.origin }}'
+{%                     endif %}
+{%                     if (rule_config.match.peer | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match peer '{{ rule_config.match.peer }}'
+{%                     endif %}
+{%                     if (rule_config.match.tag | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} match tag '{{ rule_config.match.tag }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.set | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.set.as_path | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.set.as_path.prepend | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set as-path prepend '{{ rule_config.set.as_path.prepend }}'
+{%                         endif %}
+{%                     endif %}
+{%                     if (rule_config.set.community | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.set.community.value | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set community '{{ rule_config.set.community.value }}'
+{%                         endif %}
+{%                         if (rule_config.set.community.additive | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set policy route-map {{ name }} rule {{ rule }} set community additive
+{%                         endif %}
+{%                     endif %}
+{%                     if (rule_config.set.ip | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.set.ip.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set ip next-hop '{{ rule_config.set.ip.next_hop }}'
+{%                         endif %}
+{%                     endif %}
+{%                     if (rule_config.set.ipv6 | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.set.ipv6.next_hop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                             if (rule_config.set.ipv6.next_hop.global | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set ipv6 next-hop global '{{ rule_config.set.ipv6.next_hop.global }}'
+{%                             endif %}
+{%                             if (rule_config.set.ipv6.next_hop.local | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set ipv6 next-hop local '{{ rule_config.set.ipv6.next_hop.local }}'
+{%                             endif %}
+{%                         endif %}
+{%                     endif %}
+{%                     if (rule_config.set.local_preference | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set local-preference '{{ rule_config.set.local_preference }}'
+{%                     endif %}
+{%                     if (rule_config.set.metric | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set metric '{{ rule_config.set.metric }}'
+{%                     endif %}
+{%                     if (rule_config.set.origin | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set origin '{{ rule_config.set.origin }}'
+{%                     endif %}
+{%                     if (rule_config.set.tag | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set tag '{{ rule_config.set.tag }}'
+{%                     endif %}
+{%                     if (rule_config.set.weight | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} set weight '{{ rule_config.set.weight }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.call | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} call '{{ rule_config.call }}'
+{%                 endif %}
+{%                 if (rule_config.on_match | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.on_match.next | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set policy route-map {{ name }} rule {{ rule }} on-match next
+{%                     endif %}
+{%                     if (rule_config.on_match.goto | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} on-match goto '{{ rule_config.on_match.goto }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.continue_rule | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy route-map {{ name }} rule {{ rule }} continue '{{ rule_config.continue_rule }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}

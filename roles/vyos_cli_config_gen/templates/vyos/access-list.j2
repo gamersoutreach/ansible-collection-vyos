@@ -1,0 +1,53 @@
+{% if (policy.access_list | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     for id, config in policy.access_list.items() %}
+{%         if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list {{ id }} description '{{ config.description }}'
+{%         endif %}
+{%         if (config.rules | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for rule, rule_config in config.rules.items() %}
+{%                 if (rule_config.action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list {{ id }} rule {{ rule }} action '{{ rule_config.action }}'
+{%                 endif %}
+{%                 if (rule_config.source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.source.any | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set policy access-list {{ id }} rule {{ rule }} source any
+{%                     endif %}
+{%                     if (rule_config.source.host | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list {{ id }} rule {{ rule }} source host '{{ rule_config.source.host }}'
+{%                     endif %}
+{%                     if (rule_config.source.network | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list {{ id }} rule {{ rule }} source network '{{ rule_config.source.network }}'
+{%                     endif %}
+{%                     if (rule_config.source.inverse_mask | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list {{ id }} rule {{ rule }} source inverse-mask '{{ rule_config.source.inverse_mask }}'
+{%                     endif %}
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}
+{% if (policy.access_list6 | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     for id, config in policy.access_list6.items() %}
+{%         if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list6 {{ id }} description '{{ config.description }}'
+{%         endif %}
+{%         if (config.rules | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for rule, rule_config in config.rules.items() %}
+{%                 if (rule_config.action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list6 {{ id }} rule {{ rule }} action '{{ rule_config.action }}'
+{%                 endif %}
+{%                 if (rule_config.source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.source.any | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set policy access-list6 {{ id }} rule {{ rule }} source any
+{%                     endif %}
+{%                     if (rule_config.source.network | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set policy access-list6 {{ id }} rule {{ rule }} source network '{{ rule_config.source.network }}'
+{%                     endif %}
+{%                     if (rule_config.source.exact_match | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set policy access-list6 {{ id }} rule {{ rule }} source exact-match
+{%                     endif %}
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}

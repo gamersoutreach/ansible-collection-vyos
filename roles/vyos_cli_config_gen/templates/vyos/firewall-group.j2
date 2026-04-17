@@ -1,0 +1,62 @@
+{% if (firewall.group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     if (firewall.group.address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for group_name, config in firewall.group.address_group.items() %}
+{%             if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall group address-group {{ group_name }} description '{{ config.description }}'
+{%             endif %}
+{%             if (config.address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for addr in config.address %}
+set firewall group address-group {{ group_name }} address '{{ addr }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (firewall.group.network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for group_name, config in firewall.group.network_group.items() %}
+{%             if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall group network-group {{ group_name }} description '{{ config.description }}'
+{%             endif %}
+{%             if (config.network | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for net in config.network %}
+set firewall group network-group {{ group_name }} network '{{ net }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (firewall.group.port_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for group_name, config in firewall.group.port_group.items() %}
+{%             if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall group port-group {{ group_name }} description '{{ config.description }}'
+{%             endif %}
+{%             if (config.port | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for p in config.port %}
+set firewall group port-group {{ group_name }} port '{{ p }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (firewall.group.ipv6_address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for group_name, config in firewall.group.ipv6_address_group.items() %}
+{%             if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall group ipv6-address-group {{ group_name }} description '{{ config.description }}'
+{%             endif %}
+{%             if (config.address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for addr in config.address %}
+set firewall group ipv6-address-group {{ group_name }} address '{{ addr }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (firewall.group.ipv6_network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%         for group_name, config in firewall.group.ipv6_network_group.items() %}
+{%             if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall group ipv6-network-group {{ group_name }} description '{{ config.description }}'
+{%             endif %}
+{%             if (config.network | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for net in config.network %}
+set firewall group ipv6-network-group {{ group_name }} network '{{ net }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}

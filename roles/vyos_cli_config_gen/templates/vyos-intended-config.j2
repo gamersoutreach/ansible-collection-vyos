@@ -1,0 +1,46 @@
+{# delete all config sections before applying new config #}
+delete firewall
+delete high-availability
+delete interfaces
+delete load-balancing
+delete nat
+delete policy
+delete protocols
+delete qos
+delete service
+delete system
+delete vpn
+delete vrf
+{# firewall #}
+{% include 'vyos/firewall-group.j2' %}
+{% include 'vyos/firewall-global-options.j2' %}
+{% include 'vyos/firewall-ipv4.j2' %}
+{% include 'vyos/firewall-ipv6.j2' %}
+{% include 'vyos/firewall-zone.j2' %}
+{# high-availability #}
+{% include 'vyos/high-availability.j2' %}
+{# interfaces #}
+{% include 'vyos/interfaces.j2' %}
+{# load-balancing #}
+{% include 'vyos/load-balancing.j2' %}
+{# nat #}
+{% include 'vyos/nat.j2' %}
+{# policy #}
+{% include 'vyos/access-list.j2' %}
+{% include 'vyos/as-path-list.j2' %}
+{% include 'vyos/community-list.j2' %}
+{% include 'vyos/prefix-list.j2' %}
+{% include 'vyos/prefix-list-ipv6.j2' %}
+{% include 'vyos/route-map.j2' %}
+{# protocols #}
+{% include 'vyos/protocols.j2' %}
+{# qos #}
+{% include 'vyos/qos.j2' %}
+{# service #}
+{% include 'vyos/service.j2' %}
+{# system #}
+{% include 'vyos/system.j2' %}
+{# vpn #}
+{% include 'vyos/vpn.j2' %}
+{# vrf #}
+{% include 'vyos/vrf.j2' %}

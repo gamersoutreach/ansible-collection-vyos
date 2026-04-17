@@ -1,0 +1,118 @@
+{% if (firewall.ipv4_name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     for name, config in firewall.ipv4_name.items() %}
+{%         if (config.default_action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} default-action '{{ config.default_action }}'
+{%         endif %}
+{%         if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} description '{{ config.description }}'
+{%         endif %}
+{%         if (config.enable_default_log | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} enable-default-log
+{%         endif %}
+{%         if (config.rules | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for rule, rule_config in config.rules.items() %}
+{%                 if (rule_config.action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} action '{{ rule_config.action }}'
+{%                 endif %}
+{%                 if (rule_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} description '{{ rule_config.description }}'
+{%                 endif %}
+{%                 if (rule_config.state | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.state.established | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} state 'established'
+{%                     endif %}
+{%                     if (rule_config.state.related | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} state 'related'
+{%                     endif %}
+{%                     if (rule_config.state.invalid | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} state 'invalid'
+{%                     endif %}
+{%                     if (rule_config.state.new | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} state 'new'
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.destination | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.destination.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} destination port '{{ rule_config.destination.port }}'
+{%                     endif %}
+{%                     if (rule_config.destination.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} destination address '{{ rule_config.destination.address }}'
+{%                     endif %}
+{%                     if (rule_config.destination.group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.destination.group.address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} destination group address-group '{{ rule_config.destination.group.address_group }}'
+{%                         endif %}
+{%                         if (rule_config.destination.group.network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} destination group network-group '{{ rule_config.destination.group.network_group }}'
+{%                         endif %}
+{%                         if (rule_config.destination.group.port_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} destination group port-group '{{ rule_config.destination.group.port_group }}'
+{%                         endif %}
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.source | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.source.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} source address '{{ rule_config.source.address }}'
+{%                     endif %}
+{%                     if (rule_config.source.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} source port '{{ rule_config.source.port }}'
+{%                     endif %}
+{%                     if (rule_config.source.group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.source.group.address_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} source group address-group '{{ rule_config.source.group.address_group }}'
+{%                         endif %}
+{%                         if (rule_config.source.group.network_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} source group network-group '{{ rule_config.source.group.network_group }}'
+{%                         endif %}
+{%                         if (rule_config.source.group.port_group | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} source group port-group '{{ rule_config.source.group.port_group }}'
+{%                         endif %}
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} protocol '{{ rule_config.protocol }}'
+{%                 endif %}
+{%                 if (rule_config.tcp | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.tcp.flags | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                         if (rule_config.tcp.flags.syn | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} tcp flags syn
+{%                         endif %}
+{%                         if (rule_config.tcp.flags.ack | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} tcp flags ack
+{%                         endif %}
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.inbound_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} inbound-interface name '{{ rule_config.inbound_interface }}'
+{%                 endif %}
+{%                 if (rule_config.outbound_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} outbound-interface name '{{ rule_config.outbound_interface }}'
+{%                 endif %}
+{%                 if (rule_config.connection_status | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.connection_status.nat | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} connection-status nat '{{ rule_config.connection_status.nat }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.limit | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.limit.burst | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} limit burst '{{ rule_config.limit.burst }}'
+{%                     endif %}
+{%                     if (rule_config.limit.rate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall ipv4 name {{ name }} rule {{ rule }} limit rate '{{ rule_config.limit.rate }}'
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.fragment | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%                     if (rule_config.fragment.match_frag | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} fragment match-frag
+{%                     endif %}
+{%                 endif %}
+{%                 if (rule_config.disable | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} disable
+{%                 endif %}
+{%                 if (rule_config.log | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall ipv4 name {{ name }} rule {{ rule }} log
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}

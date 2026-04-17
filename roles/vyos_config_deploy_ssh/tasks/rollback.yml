@@ -1,0 +1,7 @@
+---
+- name: Replace the running config with the previous running config
+  vyos.vyos.vyos_config:
+    src: "{{ vyos_config_deploy_ssh_pre_running_config_backup_dir }}/{{ vyos_config_deploy_ssh_pre_running_config_backup_filename }}"
+    save: true
+    match: none
+    backup: false

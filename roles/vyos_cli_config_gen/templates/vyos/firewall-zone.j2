@@ -1,0 +1,28 @@
+{% if (firewall.zone | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     for zone_name, config in firewall.zone.items() %}
+{%         if (config.local_zone | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set firewall zone {{ zone_name }} local-zone
+{%         endif %}
+{%         if (config.default_action | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall zone {{ zone_name }} default-action '{{ config.default_action }}'
+{%         endif %}
+{%         if (config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall zone {{ zone_name }} description '{{ config.description }}'
+{%         endif %}
+{%         if (config.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for iface in config.interface %}
+set firewall zone {{ zone_name }} interface '{{ iface }}'
+{%             endfor %}
+{%         endif %}
+{%         if (config.from | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             for from_zone, from_config in config.from.items() %}
+{%                 if (from_config.name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall zone {{ zone_name }} from {{ from_zone }} firewall name '{{ from_config.name }}'
+{%                 endif %}
+{%                 if (from_config.ipv6_name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set firewall zone {{ zone_name }} from {{ from_zone }} firewall ipv6-name '{{ from_config.ipv6_name }}'
+{%                 endif %}
+{%             endfor %}
+{%         endif %}
+{%     endfor %}
+{% endif %}

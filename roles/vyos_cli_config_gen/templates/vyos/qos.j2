@@ -1,0 +1,156 @@
+{# qos interface #}
+{% if (qos.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     for iface, iface_config in qos.interface.items() %}
+{%         if (iface_config.egress | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos interface {{ iface }} egress '{{ iface_config.egress }}'
+{%         endif %}
+{%         if (iface_config.ingress | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos interface {{ iface }} ingress '{{ iface_config.ingress }}'
+{%         endif %}
+{%     endfor %}
+{% endif %}
+{# qos policy #}
+{% if (qos.policy | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{# shaper #}
+{%     if (qos.policy.shaper | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for shaper_name, shaper_config in qos.policy.shaper.items() %}
+{%             if (shaper_config.bandwidth | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} bandwidth '{{ shaper_config.bandwidth }}'
+{%             endif %}
+{%             if (shaper_config.default | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (shaper_config.default.bandwidth | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} default bandwidth '{{ shaper_config.default.bandwidth }}'
+{%                 endif %}
+{%                 if (shaper_config.default.ceiling | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} default ceiling '{{ shaper_config.default.ceiling }}'
+{%                 endif %}
+{%                 if (shaper_config.default.priority | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} default priority '{{ shaper_config.default.priority }}'
+{%                 endif %}
+{%                 if (shaper_config.default.queue_type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} default queue-type '{{ shaper_config.default.queue_type }}'
+{%                 endif %}
+{%             endif %}
+{%             if (shaper_config.class | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for class_id, class_config in shaper_config.class.items() %}
+{%                     if (class_config.bandwidth | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} bandwidth '{{ class_config.bandwidth }}'
+{%                     endif %}
+{%                     if (class_config.ceiling | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} ceiling '{{ class_config.ceiling }}'
+{%                     endif %}
+{%                     if (class_config.priority | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} priority '{{ class_config.priority }}'
+{%                     endif %}
+{%                     if (class_config.queue_type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} queue-type '{{ class_config.queue_type }}'
+{%                     endif %}
+{%                     if (class_config.match | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         for match_name, match_config in class_config.match.items() %}
+{%                             if (match_config.ip | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                                 if (match_config.ip.destination | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                                     if (match_config.ip.destination.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} match {{ match_name }} ip destination port '{{ match_config.ip.destination.port }}'
+{%                                     endif %}
+{%                                     if (match_config.ip.destination.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} match {{ match_name }} ip destination address '{{ match_config.ip.destination.address }}'
+{%                                     endif %}
+{%                                 endif %}
+{%                                 if (match_config.ip.source | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                                     if (match_config.ip.source.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} match {{ match_name }} ip source port '{{ match_config.ip.source.port }}'
+{%                                     endif %}
+{%                                     if (match_config.ip.source.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} match {{ match_name }} ip source address '{{ match_config.ip.source.address }}'
+{%                                     endif %}
+{%                                 endif %}
+{%                                 if (match_config.ip.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy shaper {{ shaper_name }} class {{ class_id }} match {{ match_name }} ip protocol '{{ match_config.ip.protocol }}'
+{%                                 endif %}
+{%                             endif %}
+{%                         endfor %}
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# limiter #}
+{%     if (qos.policy.limiter | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for limiter_name, limiter_config in qos.policy.limiter.items() %}
+{%             if (limiter_config.class | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for class_id, class_config in limiter_config.class.items() %}
+{%                     if (class_config.bandwidth | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy limiter {{ limiter_name }} class {{ class_id }} bandwidth '{{ class_config.bandwidth }}'
+{%                     endif %}
+{%                     if (class_config.burst | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy limiter {{ limiter_name }} class {{ class_id }} burst '{{ class_config.burst }}'
+{%                     endif %}
+{%                     if (class_config.match | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         for match_name, match_config in class_config.match.items() %}
+{%                             if (match_config.ip | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                                 if (match_config.ip.destination | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                                     if (match_config.ip.destination.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy limiter {{ limiter_name }} class {{ class_id }} match {{ match_name }} ip destination port '{{ match_config.ip.destination.port }}'
+{%                                     endif %}
+{%                                     if (match_config.ip.destination.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy limiter {{ limiter_name }} class {{ class_id }} match {{ match_name }} ip destination address '{{ match_config.ip.destination.address }}'
+{%                                     endif %}
+{%                                 endif %}
+{%                                 if (match_config.ip.source | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                                     if (match_config.ip.source.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy limiter {{ limiter_name }} class {{ class_id }} match {{ match_name }} ip source port '{{ match_config.ip.source.port }}'
+{%                                     endif %}
+{%                                     if (match_config.ip.source.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy limiter {{ limiter_name }} class {{ class_id }} match {{ match_name }} ip source address '{{ match_config.ip.source.address }}'
+{%                                     endif %}
+{%                                 endif %}
+{%                                 if (match_config.ip.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy limiter {{ limiter_name }} class {{ class_id }} match {{ match_name }} ip protocol '{{ match_config.ip.protocol }}'
+{%                                 endif %}
+{%                             endif %}
+{%                         endfor %}
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# cake #}
+{%     if (qos.policy.cake | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for cake_name, cake_config in qos.policy.cake.items() %}
+{%             if (cake_config.bandwidth | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy cake {{ cake_name }} bandwidth '{{ cake_config.bandwidth }}'
+{%             endif %}
+{%             if (cake_config.rtt | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy cake {{ cake_name }} rtt '{{ cake_config.rtt }}'
+{%             endif %}
+{%             if (cake_config.flow_isolation | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (cake_config.flow_isolation.nat | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set qos policy cake {{ cake_name }} flow-isolation nat
+{%                 endif %}
+{%                 if (cake_config.flow_isolation.blind | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set qos policy cake {{ cake_name }} flow-isolation blind
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# fq-codel #}
+{%     if (qos.policy.fq_codel | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for fqc_name, fqc_config in qos.policy.fq_codel.items() %}
+{%             if (fqc_config.codel_quantum | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy fq-codel {{ fqc_name }} codel-quantum '{{ fqc_config.codel_quantum }}'
+{%             endif %}
+{%             if (fqc_config.flows | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy fq-codel {{ fqc_name }} flows '{{ fqc_config.flows }}'
+{%             endif %}
+{%             if (fqc_config.interval | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy fq-codel {{ fqc_name }} interval '{{ fqc_config.interval }}'
+{%             endif %}
+{%             if (fqc_config.queue_limit | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy fq-codel {{ fqc_name }} queue-limit '{{ fqc_config.queue_limit }}'
+{%             endif %}
+{%             if (fqc_config.target | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set qos policy fq-codel {{ fqc_name }} target '{{ fqc_config.target }}'
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}

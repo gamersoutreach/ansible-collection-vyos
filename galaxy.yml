@@ -1,0 +1,22 @@
+---
+namespace: gamersoutreach
+name: vyos
+version: 1.0.0
+readme: README.md
+authors:
+  - Gamers Outreach
+description: Reusable roles and plugins for managing VyOS devices
+license:
+  - MIT
+tags:
+  - networking
+  - vyos
+  - router
+repository: https://github.com/gamersoutreach/ansible-collection-vyos
+issues: https://github.com/gamersoutreach/ansible-collection-vyos/issues
+dependencies:
+  vyos.vyos: ">=4.0.0"
+build_ignore:
+  - .ansible-lint
+  - .editorconfig
+  - .gitignore

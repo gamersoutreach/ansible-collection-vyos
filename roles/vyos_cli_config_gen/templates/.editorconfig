@@ -1,0 +1,5 @@
+# EditorConfig: http://EditorConfig.org
+
+# Config partial templates should not have a trailing newline
+[*]
+insert_final_newline = false

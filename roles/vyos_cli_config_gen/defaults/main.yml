@@ -1,0 +1,6 @@
+# Root directory where to build output structure
+vyos_cli_config_gen_root_dir: "{{ playbook_dir }}"
+
+# VyOS Configuration Directory name
+vyos_cli_config_gen_config_dir_name: "configs/intended"
+vyos_cli_config_gen_config_dir: "{{ vyos_cli_config_gen_root_dir }}/configs/intended"

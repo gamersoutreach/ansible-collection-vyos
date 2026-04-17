@@ -1,0 +1,14 @@
+# Root directory where to build output structure
+vyos_config_deploy_ssh_root_dir: "{{ playbook_dir }}"
+
+# Configuration Directory name
+vyos_config_deploy_ssh_config_dir_name: "configs/intended"
+vyos_config_deploy_ssh_config_dir: "{{ vyos_config_deploy_ssh_root_dir }}/configs/intended"
+vyos_config_deploy_ssh_config_diff_dir: "{{ vyos_config_deploy_ssh_root_dir }}/configs/diff"
+
+# Backup directories path and filenames
+vyos_config_deploy_ssh_post_running_config_backup_filename: "{{ inventory_hostname }}_post_running-config.cfg"
+vyos_config_deploy_ssh_post_running_config_backup_dir: "{{ vyos_config_deploy_ssh_root_dir }}/configs/backup"
+
+vyos_config_deploy_ssh_pre_running_config_backup_filename: "{{ inventory_hostname }}_pre_running-config.cfg"
+vyos_config_deploy_ssh_pre_running_config_backup_dir: "{{ vyos_config_deploy_ssh_root_dir }}/configs/backup"

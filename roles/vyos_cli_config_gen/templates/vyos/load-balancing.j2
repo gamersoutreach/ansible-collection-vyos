@@ -1,0 +1,114 @@
+{# wan load balancing #}
+{% if (load_balancing.wan | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     set wan = load_balancing.wan %}
+{# interface health #}
+{%     if (wan.interface_health | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for iface, iface_config in wan.interface_health.items() %}
+{%             if (iface_config.nexthop | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan interface-health {{ iface }} nexthop '{{ iface_config.nexthop }}'
+{%             endif %}
+{%             if (iface_config.test | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for test_id, test_config in iface_config.test.items() %}
+{%                     if (test_config.type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan interface-health {{ iface }} test {{ test_id }} type '{{ test_config.type }}'
+{%                     endif %}
+{%                     if (test_config.target | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan interface-health {{ iface }} test {{ test_id }} target '{{ test_config.target }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# wan rules #}
+{%     if (wan.rule | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for rule_id, rule_config in wan.rule.items() %}
+{%             if (rule_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan rule {{ rule_id }} description '{{ rule_config.description }}'
+{%             endif %}
+{%             if (rule_config.inbound_interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan rule {{ rule_id }} inbound-interface '{{ rule_config.inbound_interface }}'
+{%             endif %}
+{%             if (rule_config.source | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (rule_config.source.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan rule {{ rule_id }} source address '{{ rule_config.source.address }}'
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.destination | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (rule_config.destination.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan rule {{ rule_id }} destination address '{{ rule_config.destination.address }}'
+{%                 endif %}
+{%             endif %}
+{%             if (rule_config.protocol | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan rule {{ rule_id }} protocol '{{ rule_config.protocol }}'
+{%             endif %}
+{%             if (rule_config.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for iface, iface_config in rule_config.interface.items() %}
+{%                     if (iface_config.weight | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing wan rule {{ rule_id }} interface {{ iface }} weight '{{ iface_config.weight }}'
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%             if (rule_config.exclude | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set load-balancing wan rule {{ rule_id }} exclude
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{%     if (wan.sticky_connections | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (wan.sticky_connections.inbound | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set load-balancing wan sticky-connections inbound
+{%         endif %}
+{%     endif %}
+{%     if (wan.disable_source_nat | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set load-balancing wan disable-source-nat
+{%     endif %}
+{%     if (wan.enable_local_traffic | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set load-balancing wan enable-local-traffic
+{%     endif %}
+{% endif %}
+{# reverse proxy #}
+{% if (load_balancing.reverse_proxy | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%     set rp = load_balancing.reverse_proxy %}
+{# backends #}
+{%     if (rp.backend | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for backend_name, backend_config in rp.backend.items() %}
+{%             if (backend_config.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy backend {{ backend_name }} mode '{{ backend_config.mode }}'
+{%             endif %}
+{%             if (backend_config.server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 for srv_name, srv_config in backend_config.server.items() %}
+{%                     if (srv_config.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy backend {{ backend_name }} server {{ srv_name }} address '{{ srv_config.address }}'
+{%                     endif %}
+{%                     if (srv_config.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy backend {{ backend_name }} server {{ srv_name }} port '{{ srv_config.port }}'
+{%                     endif %}
+{%                     if (srv_config.check | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set load-balancing reverse-proxy backend {{ backend_name }} server {{ srv_name }} check
+{%                     endif %}
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# services #}
+{%     if (rp.service | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for svc_name, svc_config in rp.service.items() %}
+{%             if (svc_config.listen_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy service {{ svc_name }} listen-address '{{ svc_config.listen_address }}'
+{%             endif %}
+{%             if (svc_config.port | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy service {{ svc_name }} port '{{ svc_config.port }}'
+{%             endif %}
+{%             if (svc_config.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy service {{ svc_name }} mode '{{ svc_config.mode }}'
+{%             endif %}
+{%             if (svc_config.backend | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy service {{ svc_name }} backend '{{ svc_config.backend }}'
+{%             endif %}
+{%             if (svc_config.ssl | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (svc_config.ssl.certificate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set load-balancing reverse-proxy service {{ svc_name }} ssl certificate '{{ svc_config.ssl.certificate }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}

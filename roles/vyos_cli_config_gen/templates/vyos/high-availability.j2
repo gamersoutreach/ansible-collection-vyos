@@ -1,0 +1,76 @@
+{# vrrp groups #}
+{% if (high_availability.vrrp | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%     if (high_availability.vrrp.group | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for group_name, group_config in high_availability.vrrp.group.items() %}
+{%             if (group_config.interface | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} interface '{{ group_config.interface }}'
+{%             endif %}
+{%             if (group_config.vrid | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} vrid '{{ group_config.vrid }}'
+{%             endif %}
+{%             if (group_config.address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for addr in group_config.address %}
+set high-availability vrrp group {{ group_name }} address '{{ addr }}'
+{%                 endfor %}
+{%             endif %}
+{%             if (group_config.priority | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} priority '{{ group_config.priority }}'
+{%             endif %}
+{%             if (group_config.preempt | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set high-availability vrrp group {{ group_name }} preempt
+{%             endif %}
+{%             if (group_config.preempt_delay | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} preempt-delay '{{ group_config.preempt_delay }}'
+{%             endif %}
+{%             if (group_config.hello_source_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} hello-source-address '{{ group_config.hello_source_address }}'
+{%             endif %}
+{%             if (group_config.peer_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} peer-address '{{ group_config.peer_address }}'
+{%             endif %}
+{%             if (group_config.rfc3768_compatibility | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
+set high-availability vrrp group {{ group_name }} rfc3768-compatibility
+{%             endif %}
+{%             if (group_config.authentication | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (group_config.authentication.type | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} authentication type '{{ group_config.authentication.type }}'
+{%                 endif %}
+{%                 if (group_config.authentication.password | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} authentication password '{{ group_config.authentication.password }}'
+{%                 endif %}
+{%             endif %}
+{%             if (group_config.health_check | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (group_config.health_check.script | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} health-check script '{{ group_config.health_check.script }}'
+{%                 endif %}
+{%                 if (group_config.health_check.interval | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} health-check interval '{{ group_config.health_check.interval }}'
+{%                 endif %}
+{%                 if (group_config.health_check.failure_count | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} health-check failure-count '{{ group_config.health_check.failure_count }}'
+{%                 endif %}
+{%             endif %}
+{%             if (group_config.transition_script | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                 if (group_config.transition_script.master | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} transition-script master '{{ group_config.transition_script.master }}'
+{%                 endif %}
+{%                 if (group_config.transition_script.backup | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} transition-script backup '{{ group_config.transition_script.backup }}'
+{%                 endif %}
+{%                 if (group_config.transition_script.fault | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set high-availability vrrp group {{ group_name }} transition-script fault '{{ group_config.transition_script.fault }}'
+{%                 endif %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{# vrrp sync-groups #}
+{%     if (high_availability.vrrp.sync_group | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         for sg_name, sg_config in high_availability.vrrp.sync_group.items() %}
+{%             if (sg_config.member | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                 for member in sg_config.member %}
+set high-availability vrrp sync-group {{ sg_name }} member '{{ member }}'
+{%                 endfor %}
+{%             endif %}
+{%         endfor %}
+{%     endif %}
+{% endif %}
