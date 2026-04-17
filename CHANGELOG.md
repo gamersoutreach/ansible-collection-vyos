@@ -2,6 +2,10 @@
 
 All notable changes to this collection are documented in this file. This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.2
+
+- `vyos_config_deploy_ssh.diff`: strip ANSI escape sequences (e.g. `ESC[m` color resets) from the retrieved running config before diffing. VyOS 1.4's `show configuration commands` leaks terminal escapes into programmatic output on some lines, producing persistent diff noise that looked identical to trailing-whitespace drift.
+
 ## 1.0.1
 
 - `vyos_config_deploy_ssh.diff`: strip trailing whitespace from the retrieved running config before diffing against the intended config. Works around VyOS 1.4's running-config dump emitting trailing whitespace on certain lines, which produced persistent noise in `make diff` output that survived apply.

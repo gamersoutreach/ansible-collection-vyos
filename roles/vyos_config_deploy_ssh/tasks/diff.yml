@@ -18,6 +18,13 @@
       dir_path: "{{ vyos_config_deploy_ssh_config_diff_dir }}"
       filename: "{{ vyos_config_deploy_ssh_pre_running_config_backup_filename }}"
 
+- name: Strip ANSI escape sequences from retrieved config
+  ansible.builtin.replace:
+    path: "{{ vyos_config_deploy_ssh_config_diff_dir }}/{{ vyos_config_deploy_ssh_pre_running_config_backup_filename }}"
+    regexp: '\x1b\[[0-9;?]*[a-zA-Z]'
+    replace: ''
+  delegate_to: localhost
+
 - name: Strip trailing whitespace from retrieved config for stable diff
   ansible.builtin.replace:
     path: "{{ vyos_config_deploy_ssh_config_diff_dir }}/{{ vyos_config_deploy_ssh_pre_running_config_backup_filename }}"
