@@ -54,7 +54,7 @@ def _sort_key(line):
 
 def vyos_sort_config(config_text):
     """Sort VyOS CLI config: delete lines first, then set lines in VyOS canonical order."""
-    lines = config_text.strip().split("\n")
+    lines = [line.rstrip() for line in config_text.strip().split("\n")]
     delete_lines = [line for line in lines if line.startswith("delete ")]
     set_lines = [line for line in lines if line.startswith("set ")]
     return "\n".join(delete_lines + sorted(set_lines, key=_sort_key))

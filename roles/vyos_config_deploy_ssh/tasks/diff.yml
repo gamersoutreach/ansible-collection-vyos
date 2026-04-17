@@ -18,6 +18,13 @@
       dir_path: "{{ vyos_config_deploy_ssh_config_diff_dir }}"
       filename: "{{ vyos_config_deploy_ssh_pre_running_config_backup_filename }}"
 
+- name: Strip trailing whitespace from retrieved config for stable diff
+  ansible.builtin.replace:
+    path: "{{ vyos_config_deploy_ssh_config_diff_dir }}/{{ vyos_config_deploy_ssh_pre_running_config_backup_filename }}"
+    regexp: '[ \t\r]+$'
+    replace: ''
+  delegate_to: localhost
+
 - name: Diff the running config against the intended config
   ansible.builtin.copy:
     src: "{{ vyos_config_deploy_ssh_config_dir }}/{{ inventory_hostname }}.cfg"
