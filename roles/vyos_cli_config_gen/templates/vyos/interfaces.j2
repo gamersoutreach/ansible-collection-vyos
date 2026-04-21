@@ -1,4 +1,4 @@
-{% if interfaces is gamersoutreach.vyos.vyos_defined %}
+{% if (interfaces | default(none)) is gamersoutreach.vyos.vyos_defined %}
 {%     for type, type_config in interfaces.items() %}
 {%         for interface, ifc in type_config.items() %}
 {# common options #}
@@ -83,6 +83,9 @@ set interfaces {{ type }} {{ interface }} vif {{ vif_id }} mtu '{{ vif_config.mt
 {%                 if (ifc.mode | default(none)) is gamersoutreach.vyos.vyos_defined %}
 set interfaces {{ type }} {{ interface }} mode '{{ ifc.mode }}'
 {%                 endif %}
+{%                 if (ifc.lacp_rate | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} lacp-rate '{{ ifc.lacp_rate }}'
+{%                 endif %}
 {%                 if (ifc.hash_policy | default(none)) is gamersoutreach.vyos.vyos_defined %}
 set interfaces {{ type }} {{ interface }} hash-policy '{{ ifc.hash_policy }}'
 {%                 endif %}
@@ -93,6 +96,26 @@ set interfaces {{ type }} {{ interface }} member interface '{{ member_ifc }}'
 {%                         endfor %}
 {%                     endif %}
 {%                 endif %}
+{%                 if (ifc.vif | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                     for vif_id, vif_config in ifc.vif.items() %}
+{%                         if (vif_config.address | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                             for address in vif_config.address %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} address '{{ address }}'
+{%                             endfor %}
+{%                         elif (vif_config.address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} address '{{ vif_config.address }}'
+{%                         endif %}
+{%                         if (vif_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} description '{{ vif_config.description }}'
+{%                         endif %}
+{%                         if (vif_config.mtu | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set interfaces {{ type }} {{ interface }} vif {{ vif_id }} mtu '{{ vif_config.mtu }}'
+{%                         endif %}
+{%                     endfor %}
+{%                 endif %}
+{# loopback #}
+{%             elif type == 'loopback' %}
+set interfaces {{ type }} {{ interface }}
 {# bridge #}
 {%             elif type == 'bridge' %}
 {%                 if (ifc.member | default(none)) is gamersoutreach.vyos.vyos_defined %}

@@ -32,6 +32,9 @@ set service ssh mac '{{ m }}'
 {%     if (service.ssh.loglevel | default(none)) is gamersoutreach.vyos.vyos_defined %}
 set service ssh loglevel '{{ service.ssh.loglevel }}'
 {%     endif %}
+{%     if (service.ssh.vrf | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service ssh vrf '{{ service.ssh.vrf }}'
+{%     endif %}
 {% endif %}
 {# ntp #}
 {% if (service.ntp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
@@ -73,9 +76,28 @@ set service ntp server {{ server_name }}
 {% if (service.dhcp_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
 {%     if (service.dhcp_server.shared_network_name | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
 {%         for net_name, net_config in service.dhcp_server.shared_network_name.items() %}
+{%             if (net_config.description | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service dhcp-server shared-network-name {{ net_name }} description '{{ net_config.description }}'
+{%             endif %}
 {%             if (net_config.subnet | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
 {%                 for subnet, subnet_config in net_config.subnet.items() %}
 {%                     set prefix = 'set service dhcp-server shared-network-name ' ~ net_name ~ ' subnet ' ~ subnet %}
+{%                     if (subnet_config.lease | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} lease '{{ subnet_config.lease }}'
+{%                     endif %}
+{%                     if (subnet_config.option | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%                         if (subnet_config.option.default_router | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} option default-router '{{ subnet_config.option.default_router }}'
+{%                         endif %}
+{%                         if (subnet_config.option.domain_name | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} option domain-name '{{ subnet_config.option.domain_name }}'
+{%                         endif %}
+{%                         if (subnet_config.option.name_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%                             for ns in subnet_config.option.name_server %}
+{{ prefix }} option name-server '{{ ns }}'
+{%                             endfor %}
+{%                         endif %}
+{%                     endif %}
 {%                     if (subnet_config.range | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
 {%                         for range_name, range_config in subnet_config.range.items() %}
 {%                             if (range_config.start | default(none)) is gamersoutreach.vyos.vyos_defined %}
@@ -86,20 +108,6 @@ set service ntp server {{ server_name }}
 {%                             endif %}
 {%                         endfor %}
 {%                     endif %}
-{%                     if (subnet_config.default_router | default(none)) is gamersoutreach.vyos.vyos_defined %}
-{{ prefix }} default-router '{{ subnet_config.default_router }}'
-{%                     endif %}
-{%                     if (subnet_config.dns_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
-{%                         for dns in subnet_config.dns_server %}
-{{ prefix }} dns-server '{{ dns }}'
-{%                         endfor %}
-{%                     endif %}
-{%                     if (subnet_config.domain_name | default(none)) is gamersoutreach.vyos.vyos_defined %}
-{{ prefix }} domain-name '{{ subnet_config.domain_name }}'
-{%                     endif %}
-{%                     if (subnet_config.lease | default(none)) is gamersoutreach.vyos.vyos_defined %}
-{{ prefix }} lease '{{ subnet_config.lease }}'
-{%                     endif %}
 {%                     if (subnet_config.static_mapping | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
 {%                         for mapping_name, mapping_config in subnet_config.static_mapping.items() %}
 {%                             if (mapping_config.ip_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
@@ -109,6 +117,9 @@ set service ntp server {{ server_name }}
 {{ prefix }} static-mapping {{ mapping_name }} mac-address '{{ mapping_config.mac_address }}'
 {%                             endif %}
 {%                         endfor %}
+{%                     endif %}
+{%                     if (subnet_config.subnet_id | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{{ prefix }} subnet-id '{{ subnet_config.subnet_id }}'
 {%                     endif %}
 {%                 endfor %}
 {%             endif %}
@@ -134,7 +145,7 @@ set service dns forwarding cache-size '{{ fwd.cache_size }}'
 {%         endif %}
 {%         if (fwd.name_server | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
 {%             for ns in fwd.name_server %}
-set service dns forwarding name-server '{{ ns }}'
+set service dns forwarding name-server {{ ns }}
 {%             endfor %}
 {%         endif %}
 {%         if (fwd.domain | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
@@ -187,19 +198,22 @@ set service https virtual-host {{ vhost_name }} listen-port '{{ vhost_config.lis
 {%     endif %}
 {% endif %}
 {# lldp #}
-{% if (service.lldp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
-{%     if (service.lldp.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
-{%         for iface in service.lldp.interface %}
+{% if (service.lldp | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set service lldp
+{%     if (service.lldp | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{%         if (service.lldp.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for iface in service.lldp.interface %}
 set service lldp interface {{ iface }}
-{%         endfor %}
-{%     endif %}
-{%     if (service.lldp.legacy_protocols | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
-{%         for proto in service.lldp.legacy_protocols %}
+{%             endfor %}
+{%         endif %}
+{%         if (service.lldp.legacy_protocols | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
+{%             for proto in service.lldp.legacy_protocols %}
 set service lldp legacy-protocols {{ proto }}
-{%         endfor %}
-{%     endif %}
-{%     if (service.lldp.management_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
+{%             endfor %}
+{%         endif %}
+{%         if (service.lldp.management_address | default(none)) is gamersoutreach.vyos.vyos_defined %}
 set service lldp management-address '{{ service.lldp.management_address }}'
+{%         endif %}
 {%     endif %}
 {% endif %}
 {# snmp #}

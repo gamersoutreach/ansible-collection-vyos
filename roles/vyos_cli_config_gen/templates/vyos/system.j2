@@ -172,6 +172,9 @@ set system option ctrl-alt-delete '{{ system.option.ctrl_alt_delete }}'
 {%     if (system.option.reboot_on_panic | default(none)) is gamersoutreach.vyos.vyos_defined(true) %}
 set system option reboot-on-panic
 {%     endif %}
+{%     if (system.option.reboot_on_upgrade_failure | default(none)) is gamersoutreach.vyos.vyos_defined %}
+set system option reboot-on-upgrade-failure '{{ system.option.reboot_on_upgrade_failure }}'
+{%     endif %}
 {% endif %}
 {# system static-host-mapping #}
 {% if (system.static_host_mapping | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
@@ -208,7 +211,7 @@ set system task-scheduler task {{ task_name }} executable arguments '{{ task_con
 {%     endif %}
 {% endif %}
 {# sysctl parameters (top-level variable) #}
-{% if sysctl_parameter is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
+{% if (sysctl_parameter | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="dict") %}
 {%     for sysctl_key, value in sysctl_parameter.items() %}
 set system sysctl parameter {{ sysctl_key }} value '{{ value }}'
 {%     endfor %}

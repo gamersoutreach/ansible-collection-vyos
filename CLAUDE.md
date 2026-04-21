@@ -64,14 +64,17 @@ All internal references to this collection's plugins and roles use fully-qualifi
 
 No bare short names. The find-and-replace across ~820 template occurrences was done deliberately — short-name resolution via `collections:` keyword is avoided for explicitness and lint survivability.
 
-### StrictUndefined and dotted access
+### StrictUndefined and variable references
 
-Ansible's `StrictUndefined` raises when accessing a missing dict key _before_ the test can evaluate. All dotted accesses in `{% if %}` guards must use the `| default(none)` filter:
+Ansible's `StrictUndefined` raises when resolving an undefined variable _before_ the test function is invoked — which defeats the `UndefinedError` handler in the `vyos_defined` plugin. Both dotted accesses _and_ bare top-level variable references in `{% if %}` guards must use `| default(none)` when the variable is optional:
 
 ```jinja2
-{% if (firewall.group | default(none)) is gamersoutreach.vyos.vyos_defined %}       {# correct #}
-{% if firewall.group is gamersoutreach.vyos.vyos_defined %}                          {# WRONG — raises if firewall has no 'group' key #}
+{% if (firewall.group | default(none)) is gamersoutreach.vyos.vyos_defined %}       {# dotted access — correct #}
+{% if (sysctl_parameter | default(none)) is gamersoutreach.vyos.vyos_defined %}     {# bare top-level — correct #}
+{% if sysctl_parameter is gamersoutreach.vyos.vyos_defined %}                        {# WRONG — raises in strict mode #}
 ```
+
+Loop variables (e.g., `for key, value in foo.items()`) don't need this guard since the iteration guarantees they're defined.
 
 ### Lint exceptions
 
