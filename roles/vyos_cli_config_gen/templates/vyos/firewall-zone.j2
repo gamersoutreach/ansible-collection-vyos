@@ -11,7 +11,7 @@ set firewall zone {{ zone_name }} description '{{ config.description }}'
 {%         endif %}
 {%         if (config.interface | default(none)) is gamersoutreach.vyos.vyos_defined(var_type="list") %}
 {%             for iface in config.interface %}
-set firewall zone {{ zone_name }} interface '{{ iface }}'
+set firewall zone {{ zone_name }} member interface '{{ iface }}'
 {%             endfor %}
 {%         endif %}
 {%         if (config.from | default(none)) is gamersoutreach.vyos.vyos_defined %}

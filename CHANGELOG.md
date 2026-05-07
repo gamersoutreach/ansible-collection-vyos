@@ -2,6 +2,10 @@
 
 All notable changes to this collection are documented in this file. This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.1
+
+- `vyos_cli_config_gen` `firewall-zone.j2`: update set firewall zone member interface command
+
 ## 1.1.0
 
 - `vyos_cli_config_gen` `interfaces.j2`: render `lacp-rate` on bonding interfaces from `ifc.lacp_rate`, and render `vif` sub-interfaces (address, description, mtu) on bonding interfaces. Previously only `ethernet` supported `vif`, and `lacp-rate` was not emitted at all.
